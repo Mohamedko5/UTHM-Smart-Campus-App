@@ -1,5 +1,5 @@
 name: uthm_smart_campus
-description: UTHM Smart Campus Companion - A university student services app.
+description: UTHM Smart Campus Companion - University student services app.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -10,11 +10,12 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Icons
+  # UI & Icons
   cupertino_icons: ^1.0.6
-
-  # Google Fonts (for Poppins / clean typography)
   google_fonts: ^6.1.0
+
+  # ── Google Maps ─────────────────────────────────────────────
+  google_maps_flutter: ^2.5.0
 
 dev_dependencies:
   flutter_test:
@@ -23,8 +24,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
-  # App icon assets (add your own later)
-  # assets:
-  #   - assets/images/
-  #   - assets/icons/
