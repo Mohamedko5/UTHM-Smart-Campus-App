@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uthm_smart_campus/utils/app_language.dart';
 
 class StudyPlannerScreen extends StatefulWidget {
   const StudyPlannerScreen({super.key});
@@ -253,7 +254,7 @@ class _StudyPlannerScreenState extends State<StudyPlannerScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Smart Study Planner',
+                    Text(context.tr('Smart Study Planner'),
                         style: TextStyle(
                           fontSize: 19,
                           fontWeight: FontWeight.w800,
@@ -504,7 +505,7 @@ class _StudyPlannerScreenState extends State<StudyPlannerScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Study Tip',
+                  Text(context.tr('Study Tip'),
                       style: TextStyle(
                         fontSize: 10,
                         color: Colors.white60,
@@ -868,7 +869,7 @@ class _StudyPlannerScreenState extends State<StudyPlannerScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Weekly Progress',
+              Text(context.tr('Weekly Progress'),
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -1083,7 +1084,7 @@ class _StudyPlannerScreenState extends State<StudyPlannerScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('📊 Study Statistics',
+        Text('📊 ${context.tr('Study Statistics')}',
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w800,
@@ -1173,7 +1174,7 @@ class _StudyPlannerScreenState extends State<StudyPlannerScreen>
                   size: 46, color: kBlue500),
             ),
             const SizedBox(height: 24),
-            const Text('No Study Plan Yet',
+            Text(context.tr('No Study Plan Yet'),
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
@@ -1220,7 +1221,7 @@ class _StudyPlannerScreenState extends State<StudyPlannerScreen>
               child: ElevatedButton.icon(
                 onPressed: () => Navigator.pushNamed(context, '/timetable'),
                 icon: const Icon(Icons.add_rounded, color: Colors.white),
-                label: const Text('Set Up My Timetable',
+                label: Text(context.tr('Set Up My Timetable'),
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -1236,7 +1237,7 @@ class _StudyPlannerScreenState extends State<StudyPlannerScreen>
             const SizedBox(height: 12),
             TextButton(
               onPressed: () => setState(() => _hasTimetable = true),
-              child: Text('Preview with sample data',
+              child: Text(context.tr('Preview with sample data'),
                   style: TextStyle(color: kGray400, fontSize: 13)),
             ),
           ],
@@ -1282,7 +1283,7 @@ class _StudyPlannerScreenState extends State<StudyPlannerScreen>
                       Icon(items[i]['icon'] as IconData,
                           size: 24, color: kGray400),
                       const SizedBox(height: 4),
-                      Text(items[i]['label'] as String,
+                      Text(context.tr(items[i]['label'] as String),
                           style: TextStyle(fontSize: 10, color: kGray400)),
                     ],
                   ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uthm_smart_campus/utils/app_language.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -91,25 +92,25 @@ class _ProfileScreenState extends State<ProfileScreen>
                     const SizedBox(height: 20),
 
                     // Academic info
-                    _sectionLabel('🎓 Academic Information'),
+                    _sectionLabel('🎓 ${context.tr('Academic Information')}'),
                     const SizedBox(height: 10),
                     _buildAcademicCard(),
                     const SizedBox(height: 20),
 
                     // Quick stats
-                    _sectionLabel('📊 Quick Stats'),
+                    _sectionLabel('📊 ${context.tr('Quick Stats')}'),
                     const SizedBox(height: 10),
                     _buildStatsRow(),
                     const SizedBox(height: 20),
 
                     // Notification settings
-                    _sectionLabel('🔔 Notifications'),
+                    _sectionLabel('🔔 ${context.tr('Notifications')}'),
                     const SizedBox(height: 10),
                     _buildSettingsCard([
                       _toggleTile(
                         Icons.alarm_rounded,
-                        'Reminder Alerts',
-                        'Get notified for upcoming deadlines',
+                        context.tr('Reminder Alerts'),
+                        context.tr('Get notified for upcoming deadlines'),
                         kAmber,
                         _notifReminder,
                         (v) => setState(() => _notifReminder = v),
@@ -117,8 +118,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                       _divider(),
                       _toggleTile(
                         Icons.calendar_today_rounded,
-                        'Timetable Updates',
-                        'Class schedule changes and reminders',
+                        context.tr('Timetable Updates'),
+                        context.tr('Class schedule changes and reminders'),
                         kBlue500,
                         _notifTimetable,
                         (v) => setState(() => _notifTimetable = v),
@@ -127,7 +128,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                       _toggleTile(
                         Icons.shopping_bag_rounded,
                         'Shop & Café Promos',
-                        'Deals and new menu items',
+                        context.tr('Deals and new menu items'),
                         kGreen,
                         _notifShop,
                         (v) => setState(() => _notifShop = v),
@@ -135,8 +136,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                       _divider(),
                       _toggleTile(
                         Icons.email_rounded,
-                        'Email Updates',
-                        'University announcements via email',
+                        context.tr('Email Updates'),
+                        context.tr('University announcements via email'),
                         kTeal,
                         _emailUpdates,
                         (v) => setState(() => _emailUpdates = v),
@@ -145,13 +146,13 @@ class _ProfileScreenState extends State<ProfileScreen>
                     const SizedBox(height: 20),
 
                     // App settings
-                    _sectionLabel('⚙️ App Settings'),
+                    _sectionLabel('⚙️ ${context.tr('App Settings')}'),
                     const SizedBox(height: 10),
                     _buildSettingsCard([
                       _toggleTile(
                         Icons.dark_mode_rounded,
-                        'Dark Mode',
-                        'Switch to dark theme',
+                        context.tr('Dark Mode'),
+                        context.tr('Switch to dark theme'),
                         kGray800,
                         _darkMode,
                         (v) => setState(() => _darkMode = v),
@@ -159,8 +160,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                       _divider(),
                       _toggleTile(
                         Icons.fingerprint_rounded,
-                        'Biometric Login',
-                        'Use fingerprint to login',
+                        context.tr('Biometric Login'),
+                        context.tr('Use fingerprint to login'),
                         kBlue600,
                         _biometric,
                         (v) => setState(() => _biometric = v),
@@ -168,16 +169,16 @@ class _ProfileScreenState extends State<ProfileScreen>
                       _divider(),
                       _navTile(
                         Icons.language_rounded,
-                        'Language',
-                        'English (Default)',
+                        context.tr('Language'),
+                        AppLanguageScope.languageOf(context).label,
                         kTeal,
-                        () => _showSnack('Language settings coming soon'),
+                        _showLanguageSheet,
                       ),
                       _divider(),
                       _navTile(
                         Icons.storage_rounded,
-                        'Clear Cache',
-                        'Free up app storage',
+                        context.tr('Clear Cache'),
+                        context.tr('Free up app storage'),
                         kAmber,
                         _confirmClearCache,
                       ),
@@ -185,36 +186,36 @@ class _ProfileScreenState extends State<ProfileScreen>
                     const SizedBox(height: 20),
 
                     // Support
-                    _sectionLabel('💬 Support & Help'),
+                    _sectionLabel('💬 ${context.tr('Support & Help')}'),
                     const SizedBox(height: 10),
                     _buildSettingsCard([
                       _navTile(
                         Icons.help_outline_rounded,
-                        'Help Center',
-                        'FAQs and user guide',
+                        context.tr('Help Center'),
+                        context.tr('FAQs and user guide'),
                         kBlue500,
                         () => _showSnack('Help Center opening...'),
                       ),
                       _divider(),
                       _navTile(
                         Icons.bug_report_rounded,
-                        'Report a Bug',
-                        'Help us improve the app',
+                        context.tr('Report a Bug'),
+                        context.tr('Help us improve the app'),
                         kRed,
                         () => _showSnack('Bug report form opening...'),
                       ),
                       _divider(),
                       _navTile(
                         Icons.star_rate_rounded,
-                        'Rate the App',
-                        'Leave a review on Play Store',
+                        context.tr('Rate the App'),
+                        context.tr('Leave a review on Play Store'),
                         kAmber,
                         () => _showSnack('Opening Play Store...'),
                       ),
                       _divider(),
                       _navTile(
                         Icons.info_outline_rounded,
-                        'About',
+                        context.tr('About'),
                         'Version 1.0.0 · UTHM 2025',
                         kGray400,
                         _showAboutDialog,
@@ -632,7 +633,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     color: color,
                   )),
               const SizedBox(height: 2),
-              Text(s['label'] as String,
+              Text(context.tr(s['label'] as String),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       fontSize: 9,
@@ -1000,6 +1001,136 @@ class _ProfileScreenState extends State<ProfileScreen>
   // ─────────────────────────────────────────────────────────────
   // DIALOGS
   // ─────────────────────────────────────────────────────────────
+  void _showLanguageSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: kGray200,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              context.tr('Choose Language'),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: kGray800,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              context.tr('Select the language you want to use in the app.'),
+              style: TextStyle(fontSize: 13, color: kGray400),
+            ),
+            const SizedBox(height: 18),
+            _languageOption(
+              language: AppLanguage.english,
+              subtitle: context.tr('Use English language'),
+              icon: Icons.language_rounded,
+            ),
+            const SizedBox(height: 10),
+            _languageOption(
+              language: AppLanguage.malay,
+              subtitle: context.tr('Guna Bahasa Melayu'),
+              icon: Icons.translate_rounded,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _languageOption({
+    required AppLanguage language,
+    required String subtitle,
+    required IconData icon,
+  }) {
+    final controller = AppLanguageScope.controllerOf(context);
+    final isSelected = controller.language == language;
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+        controller.setLanguage(language);
+        if (mounted) {
+          setState(() {});
+        }
+        _showSnack(
+          language == AppLanguage.english
+              ? 'Language changed to English'
+              : 'Bahasa ditukar kepada Melayu',
+        );
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: isSelected ? kBlue50 : kGray50,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? kBlue500 : kGray200,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: isSelected ? kBlue500 : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: isSelected ? Colors.white : kGray500,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    language.label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: isSelected ? kBlue500 : kGray800,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 11, color: kGray500),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              const Icon(Icons.check_circle_rounded, color: kBlue500),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _confirmLogout() {
     showDialog(
       context: context,
@@ -1220,7 +1351,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                       Icon(items[i]['icon'] as IconData,
                           size: 24, color: isActive ? kBlue500 : kGray400),
                       const SizedBox(height: 4),
-                      Text(items[i]['label'] as String,
+                      Text(context.tr(items[i]['label'] as String),
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight:

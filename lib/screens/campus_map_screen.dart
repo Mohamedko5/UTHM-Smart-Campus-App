@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:uthm_smart_campus/utils/app_language.dart';
 
 class CampusMapScreen extends StatefulWidget {
   const CampusMapScreen({super.key});
@@ -303,7 +304,7 @@ class _CampusMapScreenState extends State<CampusMapScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Campus Map',
+              Text(context.tr('Campus Map'),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
@@ -334,7 +335,7 @@ class _CampusMapScreenState extends State<CampusMapScreen>
                 decoration: const BoxDecoration(
                     color: Color(0xFF10B981), shape: BoxShape.circle)),
             const SizedBox(width: 5),
-            const Text('Live',
+            Text(context.tr('Live'),
                 style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -522,7 +523,7 @@ class _CampusMapScreenState extends State<CampusMapScreen>
         controller: _searchCtrl,
         onChanged: (v) => setState(() => _searchQuery = v),
         decoration: InputDecoration(
-          hintText: 'Search buildings, labs, facilities...',
+          hintText: context.tr('Search buildings, labs, facilities...'),
           hintStyle: TextStyle(color: kGray400, fontSize: 13),
           prefixIcon: const Icon(Icons.search_rounded,
               color: Color(0xFF94A3B8), size: 20),
@@ -811,7 +812,7 @@ class _CampusMapScreenState extends State<CampusMapScreen>
                 },
                 icon: const Icon(Icons.directions_walk_rounded,
                     color: Colors.white),
-                label: const Text('Get Directions',
+                label: Text(context.tr('Get Directions'),
                     style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -870,7 +871,7 @@ class _CampusMapScreenState extends State<CampusMapScreen>
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 5),
-            child: Text('${list.length} location(s) found',
+            child: Text('${list.length} ${context.tr('location(s) found')}',
                 style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -973,7 +974,7 @@ class _CampusMapScreenState extends State<CampusMapScreen>
                             Icon(items[i]['icon'] as IconData,
                                 size: 24, color: kGray400),
                             const SizedBox(height: 4),
-                            Text(items[i]['label'] as String,
+                            Text(context.tr(items[i]['label'] as String),
                                 style:
                                     TextStyle(fontSize: 10, color: kGray400)),
                           ],

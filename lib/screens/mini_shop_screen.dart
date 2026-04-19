@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uthm_smart_campus/utils/app_language.dart';
 import 'package:uthm_smart_campus/utils/main_navigation.dart';
 
 class MiniShopScreen extends StatefulWidget {
@@ -304,14 +305,14 @@ class _MiniShopScreenState extends State<MiniShopScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Mini Shop',
+                Text(context.tr('Mini Shop'),
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
                       letterSpacing: -0.3,
                     )),
-                Text('Campus stationery & essentials',
+                Text(context.tr('Campus stationery & essentials'),
                     style: TextStyle(
                       fontSize: 11,
                       color: Colors.white.withOpacity(0.65),
@@ -378,7 +379,7 @@ class _MiniShopScreenState extends State<MiniShopScreen>
         controller: _searchCtrl,
         onChanged: (v) => setState(() => _searchQuery = v),
         decoration: InputDecoration(
-          hintText: 'Search products...',
+          hintText: context.tr('Search products...'),
           hintStyle: TextStyle(color: kGray400, fontSize: 13),
           prefixIcon: const Icon(Icons.search_rounded,
               color: Color(0xFF94A3B8), size: 20),
@@ -481,13 +482,13 @@ class _MiniShopScreenState extends State<MiniShopScreen>
           children: [
             Icon(Icons.search_off_rounded, size: 64, color: kGray400),
             const SizedBox(height: 16),
-            const Text('No products found',
+            Text(context.tr('No products found'),
                 style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF1E293B))),
             const SizedBox(height: 6),
-            Text('Try a different search or category',
+            Text(context.tr('Try a different search or category'),
                 style: TextStyle(fontSize: 13, color: kGray500)),
           ],
         ),
@@ -1034,7 +1035,7 @@ class _MiniShopScreenState extends State<MiniShopScreen>
                     ),
                     const SizedBox(height: 16),
                     Row(children: [
-                      const Text('Your Cart',
+                      Text(context.tr('Your Cart'),
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
@@ -1059,7 +1060,7 @@ class _MiniShopScreenState extends State<MiniShopScreen>
                               Icon(Icons.shopping_cart_outlined,
                                   size: 56, color: kGray400),
                               const SizedBox(height: 12),
-                              Text('Your cart is empty',
+                              Text(context.tr('Your cart is empty'),
                                   style:
                                       TextStyle(fontSize: 15, color: kGray500)),
                             ],
@@ -1163,7 +1164,7 @@ class _MiniShopScreenState extends State<MiniShopScreen>
                       const Divider(height: 1),
                       const SizedBox(height: 14),
                       Row(children: [
-                        const Text('Total',
+                        Text(context.tr('Total'),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -1237,7 +1238,7 @@ class _MiniShopScreenState extends State<MiniShopScreen>
                   color: Color(0xFF059669), size: 36),
             ),
             const SizedBox(height: 16),
-            const Text('Order Placed!',
+            Text(context.tr('Order Placed!'),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -1262,7 +1263,7 @@ class _MiniShopScreenState extends State<MiniShopScreen>
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Done',
+                child: Text(context.tr('Done'),
                     style: TextStyle(
                         fontWeight: FontWeight.w700, color: Colors.white)),
               ),
@@ -1303,7 +1304,7 @@ class _MiniShopScreenState extends State<MiniShopScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        kMainNavItems[i]['label'] as String,
+                        context.tr(kMainNavItems[i]['label'] as String),
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight:

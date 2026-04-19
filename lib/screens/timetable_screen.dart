@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uthm_smart_campus/utils/app_language.dart';
 import 'package:uthm_smart_campus/utils/main_navigation.dart';
 
 class TimetableScreen extends StatefulWidget {
@@ -713,7 +714,7 @@ class _TimetableScreenState extends State<TimetableScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        kMainNavItems[index]['label'] as String,
+                        context.tr(kMainNavItems[index]['label'] as String),
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight:

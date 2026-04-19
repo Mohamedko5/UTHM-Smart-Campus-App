@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uthm_smart_campus/utils/app_language.dart';
 
 class ReminderScreen extends StatefulWidget {
   const ReminderScreen({super.key});
@@ -199,7 +200,7 @@ class _ReminderScreenState extends State<ReminderScreen>
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Reminder deleted'),
+        content: Text(context.tr('Reminder deleted')),
         backgroundColor: kRed,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -265,7 +266,7 @@ class _ReminderScreenState extends State<ReminderScreen>
         onPressed: _showAddReminderSheet,
         backgroundColor: kBlue500,
         icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: const Text('Add Reminder',
+        label: Text(context.tr('Add Reminder'),
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
@@ -312,14 +313,14 @@ class _ReminderScreenState extends State<ReminderScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Reminders',
+                Text(context.tr('Reminders'),
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
                       letterSpacing: -0.3,
                     )),
-                Text('Stay on top of your deadlines',
+                Text(context.tr('Stay on top of your deadlines'),
                     style: TextStyle(
                       fontSize: 11,
                       color: Colors.white.withOpacity(0.65),
@@ -382,7 +383,7 @@ class _ReminderScreenState extends State<ReminderScreen>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Overall Progress',
+                  Text(context.tr('Overall Progress'),
                       style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -759,13 +760,13 @@ class _ReminderScreenState extends State<ReminderScreen>
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Delete Reminder?',
+        title: Text(context.tr('Delete Reminder?'),
             style: TextStyle(fontWeight: FontWeight.w700)),
-        content: const Text('This reminder will be permanently deleted.'),
+        content: Text(context.tr('This reminder will be permanently deleted.')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: kGray500)),
+            child: Text(context.tr('Cancel'), style: TextStyle(color: kGray500)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -777,7 +778,7 @@ class _ReminderScreenState extends State<ReminderScreen>
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+            child: Text(context.tr('Delete'), style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -833,13 +834,13 @@ class _ReminderScreenState extends State<ReminderScreen>
                   color: kBlue500,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.add_rounded, color: Colors.white, size: 18),
-                    SizedBox(width: 6),
-                    Text('Add Reminder',
-                        style: TextStyle(
+                    const Icon(Icons.add_rounded, color: Colors.white, size: 18),
+                    const SizedBox(width: 6),
+                    Text(context.tr('Add Reminder'),
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -910,7 +911,7 @@ class _ReminderScreenState extends State<ReminderScreen>
                   ),
                   const SizedBox(height: 18),
 
-                  const Text('Add Reminder',
+                  Text(context.tr('Add Reminder'),
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -1066,7 +1067,7 @@ class _ReminderScreenState extends State<ReminderScreen>
                         Navigator.pop(ctx);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: const Text('Reminder added ✓'),
+                            content: Text(context.tr('Reminder added ✓')),
                             backgroundColor: kGreen,
                             behavior: SnackBarBehavior.floating,
                             shape: RoundedRectangleBorder(
@@ -1078,7 +1079,7 @@ class _ReminderScreenState extends State<ReminderScreen>
                       },
                       icon:
                           const Icon(Icons.check_rounded, color: Colors.white),
-                      label: const Text('Save Reminder',
+                      label: Text(context.tr('Save Reminder'),
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
@@ -1172,7 +1173,7 @@ class _ReminderScreenState extends State<ReminderScreen>
                       Icon(items[i]['icon'] as IconData,
                           size: 24, color: isActive ? kBlue500 : kGray400),
                       const SizedBox(height: 4),
-                      Text(items[i]['label'] as String,
+                      Text(context.tr(items[i]['label'] as String),
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight:

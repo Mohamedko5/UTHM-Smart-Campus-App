@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uthm_smart_campus/utils/app_language.dart';
 
 class CafeScreen extends StatefulWidget {
   const CafeScreen({super.key});
@@ -388,14 +389,14 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('UTHM Café',
+                Text(context.tr('UTHM Café'),
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
                       letterSpacing: -0.3,
                     )),
-                Text('Halal certified · Campus food court',
+                Text(context.tr('Halal certified · Campus food court'),
                     style: TextStyle(
                       fontSize: 11,
                       color: Colors.white.withOpacity(0.65),
@@ -852,7 +853,7 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
                     ),
                     const SizedBox(height: 16),
                     Row(children: [
-                      const Text('Your Order',
+                      Text(context.tr('Your Order'),
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
@@ -866,7 +867,7 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
                           setSheet(() {});
                           Navigator.pop(ctx);
                         },
-                        child: Text('Clear all',
+                        child: Text(context.tr('Clear all'),
                             style: TextStyle(
                                 fontSize: 13,
                                 color: const Color(0xFFEF4444),
@@ -1076,7 +1077,7 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
                   color: Color(0xFF059669), size: 38),
             ),
             const SizedBox(height: 16),
-            const Text('Order Confirmed!',
+            Text(context.tr('Order Confirmed!'),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -1101,7 +1102,7 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
                 children: [
                   const Icon(Icons.timer_rounded, size: 16, color: kBlue500),
                   const SizedBox(width: 6),
-                  const Text('Ready in ~5 minutes',
+                  Text(context.tr('Ready in ~5 minutes'),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -1123,7 +1124,7 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Done',
+                child: Text(context.tr('Done'),
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
@@ -1172,7 +1173,7 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
                       Icon(items[i]['icon'] as IconData,
                           size: 24, color: kGray400),
                       const SizedBox(height: 4),
-                      Text(items[i]['label'] as String,
+                      Text(context.tr(items[i]['label'] as String),
                           style: TextStyle(fontSize: 10, color: kGray400)),
                     ],
                   ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uthm_smart_campus/utils/app_language.dart';
 
 class RoomBookingScreen extends StatefulWidget {
   const RoomBookingScreen({super.key});
@@ -290,14 +291,14 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Room Booking',
+                Text(context.tr('Room Booking'),
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
                       letterSpacing: -0.3,
                     )),
-                Text('Reserve campus rooms & labs',
+                Text(context.tr('Reserve campus rooms & labs'),
                     style: TextStyle(
                       fontSize: 11,
                       color: Colors.white.withOpacity(0.65),
@@ -655,7 +656,7 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
           children: [
             Icon(Icons.info_outline_rounded, size: 16, color: kGray400),
             const SizedBox(width: 8),
-            Text('Please select a room first',
+            Text(context.tr('Please select a room first'),
                 style: TextStyle(fontSize: 13, color: kGray400)),
           ],
         ),
@@ -731,13 +732,13 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
                               booked ? TextDecoration.lineThrough : null,
                         )),
                     if (isStart)
-                      Text('Start',
+                      Text(context.tr('Start'),
                           style: TextStyle(
                               fontSize: 8,
                               color: textColor,
                               fontWeight: FontWeight.w600)),
                     if (isEnd)
-                      Text('End',
+                      Text(context.tr('End'),
                           style: TextStyle(
                               fontSize: 8,
                               color: textColor,
@@ -871,7 +872,8 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
           onChanged: (v) => setState(() => _purpose = v),
           maxLines: 2,
           decoration: InputDecoration(
-            hintText: 'Purpose of booking (e.g. Group Study, Project Meeting)',
+            hintText:
+                context.tr('Purpose of booking (e.g. Group Study, Project Meeting)'),
             hintStyle: TextStyle(color: kGray400, fontSize: 12),
             prefixIcon: const Padding(
               padding: EdgeInsets.only(bottom: 24),
@@ -905,7 +907,7 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
                 size: 18, color: Color(0xFF94A3B8)),
             const SizedBox(width: 10),
             Expanded(
-              child: Text('Number of Attendees',
+              child: Text(context.tr('Number of Attendees'),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -983,7 +985,7 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
           Row(children: [
             const Icon(Icons.info_outline_rounded, size: 16, color: kBlue500),
             const SizedBox(width: 8),
-            const Text('Booking Rules',
+            Text(context.tr('Booking Rules'),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
@@ -1116,7 +1118,7 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
                   color: Color(0xFF059669), size: 38),
             ),
             const SizedBox(height: 16),
-            const Text('Booking Confirmed!',
+            Text(context.tr('Booking Confirmed!'),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -1169,7 +1171,7 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Done',
+                child: Text(context.tr('Done'),
                     style: TextStyle(
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
@@ -1303,7 +1305,7 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
                       Icon(items[i]['icon'] as IconData,
                           size: 24, color: kGray400),
                       const SizedBox(height: 4),
-                      Text(items[i]['label'] as String,
+                      Text(context.tr(items[i]['label'] as String),
                           style: TextStyle(fontSize: 10, color: kGray400)),
                     ],
                   ),

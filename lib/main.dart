@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:uthm_smart_campus/screens/booking_room.dart';
 import 'package:uthm_smart_campus/screens/profile_screen.dart';
+import 'package:uthm_smart_campus/utils/app_language.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/timetable_screen.dart';
@@ -36,29 +37,39 @@ class UTHMApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'UTHM Smart Campus',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'Poppins',
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2563EB),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
-      initialRoute: '/login',
-      routes: {
-        '/login': (_) => const LoginScreen(),
-        '/dashboard': (_) => const DashboardScreen(),
-        '/timetable': (_) => const TimetableScreen(),
-        '/map': (_) => const CampusMapScreen(),
-        '/shop': (_) => const MiniShopScreen(),
-        '/cafe': (_) => const CafeScreen(),
-        '/booking': (_) => const RoomBookingScreen(),
-        '/reminder': (_) => const ReminderScreen(),
-        '/study_planner': (_) => const StudyPlannerScreen(),
-        '/profile': (_) => const ProfileScreen(),
+    return AnimatedBuilder(
+      animation: appLanguageController,
+      builder: (context, _) {
+        return AppLanguageScope(
+          notifier: appLanguageController,
+          child: MaterialApp(
+            title: appLanguageController.tr('UTHM Smart Campus'),
+            debugShowCheckedModeBanner: false,
+            locale: appLanguageController.language.locale,
+            supportedLocales: AppLanguage.values.map((lang) => lang.locale),
+            theme: ThemeData(
+              fontFamily: 'Poppins',
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFF2563EB),
+                brightness: Brightness.light,
+              ),
+              useMaterial3: true,
+            ),
+            initialRoute: '/login',
+            routes: {
+              '/login': (_) => const LoginScreen(),
+              '/dashboard': (_) => const DashboardScreen(),
+              '/timetable': (_) => const TimetableScreen(),
+              '/map': (_) => const CampusMapScreen(),
+              '/shop': (_) => const MiniShopScreen(),
+              '/cafe': (_) => const CafeScreen(),
+              '/booking': (_) => const RoomBookingScreen(),
+              '/reminder': (_) => const ReminderScreen(),
+              '/study_planner': (_) => const StudyPlannerScreen(),
+              '/profile': (_) => const ProfileScreen(),
+            },
+          ),
+        );
       },
     );
   }

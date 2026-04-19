@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uthm_smart_campus/utils/app_language.dart';
 import 'package:uthm_smart_campus/utils/main_navigation.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -176,8 +177,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                               const SizedBox(height: 20),
 
                               // Section title
-                              const Text(
-                                'Campus Services',
+                              Text(
+                                context.tr('Campus Services'),
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
@@ -317,7 +318,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     color: Colors.white.withValues(alpha: 0.7), size: 20),
                 const SizedBox(width: 10),
                 Text(
-                  'Search campus services...',
+                  context.tr('Search campus services...'),
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.white.withValues(alpha: 0.6),
@@ -373,8 +374,8 @@ class _DashboardScreenState extends State<DashboardScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Next Class',
+                Text(
+                  context.tr('Next Class'),
                   style: TextStyle(
                     fontSize: 11,
                     color: Colors.white70,
@@ -502,7 +503,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        feature['title'] as String,
+                        context.tr(feature['title'] as String),
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -510,7 +511,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                         ),
                       ),
                       Text(
-                        feature['subtitle'] as String,
+                        context.tr(feature['subtitle'] as String),
                         style: TextStyle(
                           fontSize: 11,
                           color: kGray400,
@@ -595,16 +596,16 @@ class _DashboardScreenState extends State<DashboardScreen>
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'Smart Study Planner',
+                  Text(
+                    context.tr('Smart Study Planner'),
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
                     ),
                   ),
-                  const Text(
-                    'AI-assisted study schedule',
+                  Text(
+                    context.tr('AI-assisted study schedule'),
                     style: TextStyle(
                       fontSize: 11,
                       color: Colors.white60,
@@ -621,8 +622,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Text(
-                'Open →',
+              child: Text(
+                '${context.tr('Open')} →',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -676,7 +677,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 
                       // Label
                       Text(
-                        kMainNavItems[index]['label'] as String,
+                        context.tr(kMainNavItems[index]['label'] as String),
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight:
@@ -713,8 +714,8 @@ class _DashboardScreenState extends State<DashboardScreen>
   // ─────────────────────────────────────────────────────────────
   String _getGreeting() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning 👋';
-    if (hour < 17) return 'Good afternoon 👋';
-    return 'Good evening 👋';
+    if (hour < 12) return '${context.tr('Good morning')} 👋';
+    if (hour < 17) return '${context.tr('Good afternoon')} 👋';
+    return '${context.tr('Good evening')} 👋';
   }
 }
