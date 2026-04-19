@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:uthm_smart_campus/screens/booking_room.dart';
+import 'package:uthm_smart_campus/screens/profile_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/timetable_screen.dart';
@@ -57,6 +58,7 @@ class UTHMApp extends StatelessWidget {
         '/booking': (_) => const RoomBookingScreen(),
         '/reminder': (_) => const ReminderScreen(),
         '/study_planner': (_) => const StudyPlannerScreen(),
+        '/profile': (_) => const ProfileScreen(),
       },
     );
   }

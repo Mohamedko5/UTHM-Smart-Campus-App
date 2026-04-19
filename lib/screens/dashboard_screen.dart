@@ -280,7 +280,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 
               // Avatar
               GestureDetector(
-                onTap: () {},
+                onTap: () => Navigator.pushNamed(context, '/profile'),
                 child: Container(
                   width: 42,
                   height: 42,
