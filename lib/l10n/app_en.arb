@@ -1,0 +1,18 @@
+{
+  "@@locale": "en",
+  "appTitle": "UTHM Smart Campus",
+  "goodMorning": "Good morning",
+  "goodAfternoon": "Good afternoon",
+  "goodEvening": "Good evening",
+  "searchCampusServices": "Search campus services...",
+  "nextClass": "Next Class",
+  "campusServices": "Campus Services",
+  "home": "Home",
+  "schedule": "Schedule",
+  "map": "Map",
+  "store": "Store",
+  "language": "Language",
+  "english": "English",
+  "bahasaMelayu": "Bahasa Melayu",
+  "startsIn": "Starts in"
+}

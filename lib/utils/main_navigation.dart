@@ -8,7 +8,7 @@ const List<Map<String, dynamic>> kMainNavItems = [
   },
   {
     'icon': Icons.calendar_today_rounded,
-    'label': 'Timetable',
+    'label': 'Schedule',
     'route': '/timetable',
   },
   {
@@ -18,7 +18,7 @@ const List<Map<String, dynamic>> kMainNavItems = [
   },
   {
     'icon': Icons.shopping_bag_rounded,
-    'label': 'Shop',
+    'label': 'Store',
     'route': '/shop',
   },
 ];

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum AppLanguage {
   english('English', Locale('en')),
@@ -8,12 +9,30 @@ enum AppLanguage {
 
   final String label;
   final Locale locale;
+
+  static AppLanguage fromCode(String? code) {
+    return AppLanguage.values.firstWhere(
+      (language) => language.locale.languageCode == code,
+      orElse: () => AppLanguage.english,
+    );
+  }
 }
 
 class AppLanguageController extends ChangeNotifier {
+  static const String _storageKey = 'selected_language_code';
+
   AppLanguage _language = AppLanguage.english;
+  bool _isLoaded = false;
 
   AppLanguage get language => _language;
+  bool get isLoaded => _isLoaded;
+
+  Future<void> load() async {
+    final prefs = await SharedPreferences.getInstance();
+    _language = AppLanguage.fromCode(prefs.getString(_storageKey));
+    _isLoaded = true;
+    notifyListeners();
+  }
 
   String tr(String text) {
     if (_language == AppLanguage.english) {
@@ -23,12 +42,14 @@ class AppLanguageController extends ChangeNotifier {
     return _ms[text] ?? text;
   }
 
-  void setLanguage(AppLanguage language) {
+  Future<void> setLanguage(AppLanguage language) async {
     if (_language == language) {
       return;
     }
 
     _language = language;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_storageKey, language.locale.languageCode);
     notifyListeners();
   }
 }
@@ -69,6 +90,7 @@ const Map<String, String> _ms = {
   'Alerts': 'Amaran',
   'Map': 'Peta',
   'Shop': 'Kedai',
+  'Store': 'Kedai',
   'Profile': 'Profil',
   'Good morning': 'Selamat pagi',
   'Good afternoon': 'Selamat petang',

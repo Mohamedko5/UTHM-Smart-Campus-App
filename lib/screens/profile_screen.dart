@@ -1005,77 +1005,92 @@ class _ProfileScreenState extends State<ProfileScreen>
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: kGray200,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+      builder: (sheetContext) {
+        return AnimatedBuilder(
+          animation: appLanguageController,
+          builder: (context, _) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               ),
-            ),
-            const SizedBox(height: 18),
-            Text(
-              context.tr('Choose Language'),
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: kGray800,
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: kGray200,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    appLanguageController.tr('Choose Language'),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: kGray800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    appLanguageController.tr(
+                      'Select the language you want to use in the app.',
+                    ),
+                    style: TextStyle(fontSize: 13, color: kGray400),
+                  ),
+                  const SizedBox(height: 18),
+                  _languageOption(
+                    sheetContext: sheetContext,
+                    language: AppLanguage.english,
+                    subtitle:
+                        appLanguageController.tr('Use English language'),
+                    icon: Icons.language_rounded,
+                  ),
+                  const SizedBox(height: 10),
+                  _languageOption(
+                    sheetContext: sheetContext,
+                    language: AppLanguage.malay,
+                    subtitle: appLanguageController.tr('Guna Bahasa Melayu'),
+                    icon: Icons.translate_rounded,
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              context.tr('Select the language you want to use in the app.'),
-              style: TextStyle(fontSize: 13, color: kGray400),
-            ),
-            const SizedBox(height: 18),
-            _languageOption(
-              language: AppLanguage.english,
-              subtitle: context.tr('Use English language'),
-              icon: Icons.language_rounded,
-            ),
-            const SizedBox(height: 10),
-            _languageOption(
-              language: AppLanguage.malay,
-              subtitle: context.tr('Guna Bahasa Melayu'),
-              icon: Icons.translate_rounded,
-            ),
-          ],
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 
   Widget _languageOption({
+    required BuildContext sheetContext,
     required AppLanguage language,
     required String subtitle,
     required IconData icon,
   }) {
-    final controller = AppLanguageScope.controllerOf(context);
-    final isSelected = controller.language == language;
+    final isSelected = appLanguageController.language == language;
     return GestureDetector(
-      onTap: () {
-        Navigator.pop(context);
-        controller.setLanguage(language);
+      onTap: () async {
+        final navigator = Navigator.of(sheetContext);
+        await appLanguageController.setLanguage(language);
+        if (navigator.canPop()) {
+          navigator.pop();
+        }
         if (mounted) {
           setState(() {});
+          _showSnack(
+            language == AppLanguage.english
+                ? 'Language changed to English'
+                : 'Bahasa ditukar kepada Melayu',
+          );
         }
-        _showSnack(
-          language == AppLanguage.english
-              ? 'Language changed to English'
-              : 'Bahasa ditukar kepada Melayu',
-        );
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),

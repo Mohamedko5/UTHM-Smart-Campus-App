@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uthm_smart_campus/l10n/app_localizations.dart';
 import 'package:uthm_smart_campus/utils/app_language.dart';
 import 'package:uthm_smart_campus/utils/main_navigation.dart';
 
@@ -141,6 +142,8 @@ class _DashboardScreenState extends State<DashboardScreen>
   // ─────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: kGray50,
       body: FadeTransition(
@@ -178,7 +181,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 
                               // Section title
                               Text(
-                                context.tr('Campus Services'),
+                                l10n.campusServices,
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
@@ -216,6 +219,8 @@ class _DashboardScreenState extends State<DashboardScreen>
   // HEADER
   // ─────────────────────────────────────────────────────────────
   Widget _buildHeader() {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -249,14 +254,23 @@ class _DashboardScreenState extends State<DashboardScreen>
                       ),
                     ),
                     const SizedBox(height: 2),
-                    const Text(
-                      'Ahmad Faris',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        letterSpacing: -0.3,
-                      ),
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Ahmad Faris',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        _buildLanguageSwitcher(),
+                      ],
                     ),
                   ],
                 ),
@@ -318,7 +332,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     color: Colors.white.withValues(alpha: 0.7), size: 20),
                 const SizedBox(width: 10),
                 Text(
-                  context.tr('Search campus services...'),
+                  l10n.searchCampusServices,
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.white.withValues(alpha: 0.6),
@@ -332,10 +346,110 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
+  Widget _buildLanguageSwitcher() {
+    final l10n = AppLocalizations.of(context);
+
+    return AnimatedBuilder(
+      animation: appLanguageController,
+      builder: (context, _) {
+        final currentLanguage = appLanguageController.language;
+        final currentCode =
+            currentLanguage == AppLanguage.english ? 'EN' : 'MS';
+
+        return PopupMenuButton<AppLanguage>(
+          tooltip: l10n.language,
+          initialValue: currentLanguage,
+          color: Colors.white,
+          elevation: 10,
+          offset: const Offset(0, 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          onSelected: (language) async {
+            await appLanguageController.setLanguage(language);
+            if (mounted) {
+              setState(() {});
+            }
+          },
+          itemBuilder: (context) {
+            return AppLanguage.values.map((language) {
+              final isSelected = language == currentLanguage;
+              final label = language == AppLanguage.english
+                  ? l10n.english
+                  : l10n.bahasaMelayu;
+
+              return PopupMenuItem<AppLanguage>(
+                value: language,
+                child: Row(
+                  children: [
+                    Icon(
+                      isSelected
+                          ? Icons.radio_button_checked_rounded
+                          : Icons.radio_button_off_rounded,
+                      color: isSelected ? kBlue500 : kGray400,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        color: kGray800,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList();
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.26),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.language_rounded,
+                  color: Colors.white,
+                  size: 15,
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  currentCode,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+                const SizedBox(width: 2),
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: Colors.white.withValues(alpha: 0.75),
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   // ─────────────────────────────────────────────────────────────
   // NEXT CLASS BANNER
   // ─────────────────────────────────────────────────────────────
   Widget _buildNextClassBanner() {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
@@ -375,7 +489,7 @@ class _DashboardScreenState extends State<DashboardScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  context.tr('Next Class'),
+                  l10n.nextClass,
                   style: TextStyle(
                     fontSize: 11,
                     color: Colors.white70,
@@ -392,7 +506,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   ),
                 ),
                 Text(
-                  '${_nextClass['room']} · Starts in ${_nextClass['minutes']}',
+                  '${_nextClass['room']} · ${l10n.startsIn} ${_nextClass['minutes']}',
                   style: const TextStyle(
                     fontSize: 11,
                     color: Colors.white70,
@@ -677,7 +791,9 @@ class _DashboardScreenState extends State<DashboardScreen>
 
                       // Label
                       Text(
-                        context.tr(kMainNavItems[index]['label'] as String),
+                        _localizedMainNavLabel(
+                          kMainNavItems[index]['label'] as String,
+                        ),
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight:
@@ -713,9 +829,22 @@ class _DashboardScreenState extends State<DashboardScreen>
   // HELPERS
   // ─────────────────────────────────────────────────────────────
   String _getGreeting() {
+    final l10n = AppLocalizations.of(context);
     final hour = DateTime.now().hour;
-    if (hour < 12) return '${context.tr('Good morning')} 👋';
-    if (hour < 17) return '${context.tr('Good afternoon')} 👋';
-    return '${context.tr('Good evening')} 👋';
+    if (hour < 12) return '${l10n.goodMorning} 👋';
+    if (hour < 17) return '${l10n.goodAfternoon} 👋';
+    return '${l10n.goodEvening} 👋';
+  }
+
+  String _localizedMainNavLabel(String label) {
+    final l10n = AppLocalizations.of(context);
+
+    return switch (label) {
+      'Home' => l10n.home,
+      'Schedule' => l10n.schedule,
+      'Map' => l10n.map,
+      'Store' => l10n.store,
+      _ => context.tr(label),
+    };
   }
 }

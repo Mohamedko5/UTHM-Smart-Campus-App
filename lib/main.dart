@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:uthm_smart_campus/l10n/app_localizations.dart';
 import 'package:uthm_smart_campus/screens/booking_room.dart';
 import 'package:uthm_smart_campus/screens/profile_screen.dart';
 import 'package:uthm_smart_campus/utils/app_language.dart';
@@ -11,9 +13,11 @@ import 'screens/mini_shop_screen.dart';
 import 'screens/cafe_screen.dart';
 import 'screens/reminder_screen.dart';
 import 'screens/study_planner_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await appLanguageController.load();
 
   // Lock to portrait mode
   SystemChrome.setPreferredOrientations([
@@ -46,7 +50,13 @@ class UTHMApp extends StatelessWidget {
             title: appLanguageController.tr('UTHM Smart Campus'),
             debugShowCheckedModeBanner: false,
             locale: appLanguageController.language.locale,
-            supportedLocales: AppLanguage.values.map((lang) => lang.locale),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
             theme: ThemeData(
               fontFamily: 'Poppins',
               colorScheme: ColorScheme.fromSeed(
