@@ -14,7 +14,7 @@ const List<Map<String, dynamic>> kMainNavItems = [
   {
     'icon': Icons.notifications_rounded,
     'label': 'Alerts',
-    'route': '/notifications',
+    'route': '/reminder',
   },
   {
     'icon': Icons.person_rounded,

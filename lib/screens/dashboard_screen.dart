@@ -4,6 +4,7 @@ import 'package:uthm_smart_campus/models/student.dart';
 import 'package:uthm_smart_campus/screens/profile_screen.dart';
 import 'package:uthm_smart_campus/utils/app_language.dart';
 import 'package:uthm_smart_campus/utils/main_navigation.dart';
+import 'package:uthm_smart_campus/widgets/language_selector.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -254,10 +255,10 @@ class _DashboardScreenState extends State<DashboardScreen>
       ),
       child: Column(
         children: [
-          // Top row: greeting + avatar
+          // Top row: student identity on the left, quick controls on the right.
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Greeting
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,62 +271,39 @@ class _DashboardScreenState extends State<DashboardScreen>
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      studentName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                studentName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  letterSpacing: -0.3,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                matric,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white.withValues(alpha: 0.78),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        _buildLanguageSwitcher(),
-                      ],
+                    Text(
+                      matric,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withValues(alpha: 0.78),
+                      ),
                     ),
                   ],
                 ),
               ),
 
-              // Notification bell
-              GestureDetector(
-                onTap: () => _onFeatureTap('reminder'),
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  margin: const EdgeInsets.only(right: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Center(
-                    child: Text('🔔', style: TextStyle(fontSize: 18)),
-                  ),
-                ),
+              const SizedBox(width: 14),
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: const LanguageSelector(),
               ),
+              const SizedBox(width: 10),
 
               // Avatar
               GestureDetector(
@@ -341,8 +319,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                   );
                 },
                 child: Container(
-                  width: 42,
-                  height: 42,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
@@ -411,109 +389,6 @@ class _DashboardScreenState extends State<DashboardScreen>
       Icons.person_rounded,
       color: Colors.white,
       size: 24,
-    );
-  }
-
-  Widget _buildLanguageSwitcher() {
-    final l10n = AppLocalizations.of(context);
-
-    return AnimatedBuilder(
-      animation: appLanguageController,
-      builder: (context, _) {
-        final currentLanguage = appLanguageController.language;
-        final currentCode = switch (currentLanguage) {
-          AppLanguage.english => 'EN',
-          AppLanguage.malay => 'MS',
-          AppLanguage.arabic => 'AR',
-        };
-
-        return PopupMenuButton<AppLanguage>(
-          tooltip: l10n.language,
-          initialValue: currentLanguage,
-          color: Colors.white,
-          elevation: 10,
-          offset: const Offset(0, 10),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          onSelected: (language) async {
-            await appLanguageController.setLanguage(language);
-            if (mounted) {
-              setState(() {});
-            }
-          },
-          itemBuilder: (context) {
-            return AppLanguage.values.map((language) {
-              final isSelected = language == currentLanguage;
-              final label = switch (language) {
-                AppLanguage.english => l10n.english,
-                AppLanguage.malay => l10n.bahasaMelayu,
-                AppLanguage.arabic => l10n.arabic,
-              };
-
-              return PopupMenuItem<AppLanguage>(
-                value: language,
-                child: Row(
-                  children: [
-                    Icon(
-                      isSelected
-                          ? Icons.radio_button_checked_rounded
-                          : Icons.radio_button_off_rounded,
-                      color: isSelected ? kBlue500 : kGray400,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      label,
-                      style: TextStyle(
-                        color: kGray800,
-                        fontWeight:
-                            isSelected ? FontWeight.w700 : FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList();
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.26),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.language_rounded,
-                  color: Colors.white,
-                  size: 15,
-                ),
-                const SizedBox(width: 5),
-                Text(
-                  currentCode,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.4,
-                  ),
-                ),
-                const SizedBox(width: 2),
-                Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: Colors.white.withValues(alpha: 0.75),
-                  size: 16,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 

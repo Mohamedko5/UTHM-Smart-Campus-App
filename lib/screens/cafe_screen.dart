@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:uthm_smart_campus/utils/app_language.dart';
 import 'package:uthm_smart_campus/utils/main_navigation.dart';
 
+enum CafePaymentMethod {
+  cashOnDelivery,
+  touchNGo,
+  visa,
+  masterCard,
+}
+
 class CafeScreen extends StatefulWidget {
   const CafeScreen({super.key});
 
@@ -29,6 +36,7 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
 
   // ── State ─────────────────────────────────────────────────────
   final Map<String, int> _order = {}; // itemId → qty
+  CafePaymentMethod? _selectedPaymentMethod;
   bool _isOpen = true;
 
   // ── Animation ─────────────────────────────────────────────────
@@ -282,6 +290,24 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
       } catch (_) {}
     }
     return null;
+  }
+
+  String _paymentLabel(CafePaymentMethod method) {
+    return switch (method) {
+      CafePaymentMethod.cashOnDelivery => 'Cash on delivery',
+      CafePaymentMethod.touchNGo => "Touch 'n Go",
+      CafePaymentMethod.visa => 'Visa',
+      CafePaymentMethod.masterCard => 'MasterCard',
+    };
+  }
+
+  IconData _paymentIcon(CafePaymentMethod method) {
+    return switch (method) {
+      CafePaymentMethod.cashOnDelivery => Icons.payments_rounded,
+      CafePaymentMethod.touchNGo => Icons.account_balance_wallet_rounded,
+      CafePaymentMethod.visa => Icons.credit_card_rounded,
+      CafePaymentMethod.masterCard => Icons.credit_score_rounded,
+    };
   }
 
   void _add(String id) => setState(() => _order[id] = (_order[id] ?? 0) + 1);
@@ -831,7 +857,7 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
           });
 
           return Container(
-            height: MediaQuery.of(context).size.height * 0.75,
+            height: MediaQuery.of(context).size.height * 0.82,
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -864,7 +890,10 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
                       // Clear all
                       GestureDetector(
                         onTap: () {
-                          setState(() => _order.clear());
+                          setState(() {
+                            _order.clear();
+                            _selectedPaymentMethod = null;
+                          });
                           setSheet(() {});
                           Navigator.pop(ctx);
                         },
@@ -987,12 +1016,33 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
                     // Summary rows
                     _summaryRow('Subtotal',
                         'RM ${_orderTotal.toStringAsFixed(2)}', false),
-                    const SizedBox(height: 6),
-                    _summaryRow('Service charge (6%)',
-                        'RM ${(_orderTotal * 0.06).toStringAsFixed(2)}', false),
                     const Divider(height: 20),
                     _summaryRow('Total',
-                        'RM ${(_orderTotal * 1.06).toStringAsFixed(2)}', true),
+                        'RM ${_orderTotal.toStringAsFixed(2)}', true),
+                    const SizedBox(height: 16),
+
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        context.tr('Payment Method'),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: kGray800,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: CafePaymentMethod.values.map((method) {
+                        return _paymentMethodTile(
+                          method: method,
+                          setSheet: setSheet,
+                        );
+                      }).toList(),
+                    ),
                     const SizedBox(height: 16),
 
                     // Place order
@@ -1001,8 +1051,26 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
                       height: 52,
                       child: ElevatedButton.icon(
                         onPressed: () {
+                          if (_selectedPaymentMethod == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text(
+                                  'Please choose one payment method',
+                                ),
+                                backgroundColor: const Color(0xFFEF4444),
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                margin: const EdgeInsets.all(16),
+                              ),
+                            );
+                            return;
+                          }
+
+                          final paymentMethod = _selectedPaymentMethod!;
                           Navigator.pop(ctx);
-                          _showOrderConfirmed();
+                          _showOrderConfirmed(paymentMethod);
                         },
                         icon: const Icon(Icons.check_circle_outline_rounded,
                             color: Colors.white),
@@ -1032,6 +1100,67 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
     );
   }
 
+  Widget _paymentMethodTile({
+    required CafePaymentMethod method,
+    required StateSetter setSheet,
+  }) {
+    final isSelected = _selectedPaymentMethod == method;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() => _selectedPaymentMethod = method);
+        setSheet(() {});
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        width: 155,
+        padding: const EdgeInsets.all(11),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFEFF6FF) : kGray50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? kBlue500 : kGray200,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              _paymentIcon(method),
+              size: 18,
+              color: isSelected ? kBlue500 : kGray500,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _paymentLabel(method),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: isSelected ? kBlue500 : kGray800,
+                ),
+              ),
+            ),
+            Radio<CafePaymentMethod>(
+              value: method,
+              groupValue: _selectedPaymentMethod,
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() => _selectedPaymentMethod = value);
+                setSheet(() {});
+              },
+              visualDensity: VisualDensity.compact,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              activeColor: kBlue500,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _summaryRow(String label, String value, bool isBold) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1055,7 +1184,7 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
   // ─────────────────────────────────────────────────────────────
   // ORDER CONFIRMED DIALOG
   // ─────────────────────────────────────────────────────────────
-  void _showOrderConfirmed() {
+  void _showOrderConfirmed(CafePaymentMethod paymentMethod) {
     final orderNum =
         'ORD${DateTime.now().millisecond.toString().padLeft(3, '0')}';
     showDialog(
@@ -1090,6 +1219,16 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 13, color: kGray500),
             ),
+            const SizedBox(height: 8),
+            Text(
+              'Payment: ${_paymentLabel(paymentMethod)}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: kBlue500,
+              ),
+            ),
             const SizedBox(height: 12),
             // Est. time
             Container(
@@ -1117,7 +1256,10 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  setState(() => _order.clear());
+                  setState(() {
+                    _order.clear();
+                    _selectedPaymentMethod = null;
+                  });
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
