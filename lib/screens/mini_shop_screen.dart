@@ -2,6 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:uthm_smart_campus/utils/app_language.dart';
 import 'package:uthm_smart_campus/utils/main_navigation.dart';
 
+enum PaymentMethod {
+  cashOnDelivery,
+  touchNGo,
+  visa,
+  masterCard,
+}
+
+class CartItem {
+  const CartItem({
+    required this.product,
+    required this.quantity,
+  });
+
+  final Map<String, dynamic> product;
+  final int quantity;
+
+  double get subtotal => (product['price'] as double) * quantity;
+}
+
 class MiniShopScreen extends StatefulWidget {
   const MiniShopScreen({super.key});
 
@@ -29,6 +48,7 @@ class _MiniShopScreenState extends State<MiniShopScreen>
   // ── State ─────────────────────────────────────────────────────
   String _selectedCategory = 'All';
   String _searchQuery = '';
+  PaymentMethod? _selectedPaymentMethod;
   final Map<String, int> _cart = {}; // productId → quantity
   final TextEditingController _searchCtrl = TextEditingController();
 
@@ -196,6 +216,34 @@ class _MiniShopScreenState extends State<MiniShopScreen>
       total += (product['price'] as double) * qty;
     });
     return total;
+  }
+
+  List<CartItem> get _cartItems {
+    return _products
+        .where((p) => _cart.containsKey(p['id']) && _cart[p['id']]! > 0)
+        .map((p) => CartItem(
+              product: p,
+              quantity: _cart[p['id']] ?? 0,
+            ))
+        .toList();
+  }
+
+  String _paymentLabel(PaymentMethod method) {
+    return switch (method) {
+      PaymentMethod.cashOnDelivery => 'Cash on delivery',
+      PaymentMethod.touchNGo => "Touch 'n Go",
+      PaymentMethod.visa => 'Visa',
+      PaymentMethod.masterCard => 'MasterCard',
+    };
+  }
+
+  IconData _paymentIcon(PaymentMethod method) {
+    return switch (method) {
+      PaymentMethod.cashOnDelivery => Icons.payments_rounded,
+      PaymentMethod.touchNGo => Icons.account_balance_wallet_rounded,
+      PaymentMethod.visa => Icons.credit_card_rounded,
+      PaymentMethod.masterCard => Icons.credit_score_rounded,
+    };
   }
 
   void _addToCart(String id) {
@@ -495,29 +543,245 @@ class _MiniShopScreenState extends State<MiniShopScreen>
       );
     }
 
-    return GridView.builder(
-      padding: EdgeInsets.fromLTRB(16, 14, 16, _cartItemCount > 0 ? 8 : 16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.82,
-      ),
+    return ListView.builder(
+      padding: EdgeInsets.fromLTRB(16, 12, 16, _cartItemCount > 0 ? 8 : 16),
       itemCount: products.length,
       itemBuilder: (context, index) {
         return TweenAnimationBuilder<double>(
           tween: Tween(begin: 0, end: 1),
-          duration: Duration(milliseconds: 300 + (index * 60)),
+          duration: Duration(milliseconds: 250 + (index * 60)),
           curve: Curves.easeOut,
           builder: (_, v, child) => Opacity(
             opacity: v,
             child: Transform.translate(
-                offset: Offset(0, 14 * (1 - v)), child: child),
+                offset: Offset(0, 12 * (1 - v)), child: child),
           ),
-          child: _buildProductCard(products[index]),
+          child: _buildProductTile(products[index]),
         );
       },
     );
+  }
+
+  Widget _buildProductTile(Map<String, dynamic> product) {
+    final id = product['id'] as String;
+    final qty = _cart[id] ?? 0;
+    final badge = product['badge'] as String;
+    final isLowStock = (product['stock'] as int) <= 5;
+
+    return GestureDetector(
+      onTap: () => _showProductDetail(product),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: qty > 0 ? kBlue500 : kGray100,
+            width: qty > 0 ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: product['bgColor'] as Color,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      product['icon'] as IconData,
+                      size: 30,
+                      color: product['iconColor'] as Color,
+                    ),
+                  ),
+                  if (badge.isNotEmpty)
+                    Positioned(
+                      top: -6,
+                      right: -6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _badgeColor(badge),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Text(
+                          badge,
+                          style: const TextStyle(
+                            fontSize: 8,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (isLowStock)
+                    Positioned(
+                      bottom: -6,
+                      right: -6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF7ED),
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(color: const Color(0xFFFED7AA)),
+                        ),
+                        child: const Text(
+                          'Low stock',
+                          style: TextStyle(
+                            fontSize: 8,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFFEA580C),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product['name'],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: kGray800,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      _productDescription(product),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 11, color: kGray500),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Text(
+                          'RM ${(product['price'] as double).toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: kBlue500,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: kGray100,
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Text(
+                            '${product['stock']} left',
+                            style: TextStyle(
+                              fontSize: 9,
+                              color: kGray500,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              qty == 0
+                  ? GestureDetector(
+                      onTap: () => _addToCart(id),
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: kBlue500,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.add_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    )
+                  : Column(
+                      children: [
+                        _qtyBtn(
+                          Icons.add_rounded,
+                          () => _addToCart(id),
+                          kBlue500,
+                          Colors.white,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Text(
+                            '$qty',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: kGray800,
+                            ),
+                          ),
+                        ),
+                        _qtyBtn(
+                          Icons.remove_rounded,
+                          () => _removeFromCart(id),
+                          kGray100,
+                          kGray800,
+                        ),
+                      ],
+                    ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _productDescription(Map<String, dynamic> product) {
+    return switch (product['category'] as String) {
+      'Stationery' => 'Campus writing and study essential',
+      'Books' => 'Reference material for coursework',
+      'Accessories' => 'Useful tech and study accessory',
+      'Snacks' => 'Quick grab-and-go campus snack',
+      _ => 'Mini Shop campus essential',
+    };
+  }
+
+  Color _badgeColor(String badge) {
+    return switch (badge) {
+      'Sale' => const Color(0xFFEF4444),
+      'New' => kGreen,
+      'Popular' => kBlue500,
+      _ => kTeal,
+    };
   }
 
   Widget _buildProductCard(Map<String, dynamic> product) {
@@ -1007,9 +1271,7 @@ class _MiniShopScreenState extends State<MiniShopScreen>
       backgroundColor: Colors.transparent,
       builder: (_) => StatefulBuilder(
         builder: (context, setSheetState) {
-          final cartItems = _products
-              .where((p) => _cart.containsKey(p['id']) && _cart[p['id']]! > 0)
-              .toList();
+          final cartItems = _cartItems;
 
           return Container(
             height: MediaQuery.of(context).size.height * 0.7,
@@ -1071,9 +1333,10 @@ class _MiniShopScreenState extends State<MiniShopScreen>
                               horizontal: 16, vertical: 8),
                           itemCount: cartItems.length,
                           itemBuilder: (_, i) {
-                            final p = cartItems[i];
+                            final cartItem = cartItems[i];
+                            final p = cartItem.product;
                             final id = p['id'] as String;
-                            final qty = _cart[id] ?? 0;
+                            final qty = cartItem.quantity;
                             return Container(
                               margin: const EdgeInsets.only(bottom: 10),
                               padding: const EdgeInsets.all(12),
@@ -1180,14 +1443,55 @@ class _MiniShopScreenState extends State<MiniShopScreen>
                           ),
                         ),
                       ]),
+                      const SizedBox(height: 16),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Payment Method',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: kGray800,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: PaymentMethod.values.map((method) {
+                          return _paymentMethodTile(
+                            method: method,
+                            setSheetState: setSheetState,
+                          );
+                        }).toList(),
+                      ),
                       const SizedBox(height: 14),
                       SizedBox(
                         width: double.infinity,
                         height: 52,
                         child: ElevatedButton(
                           onPressed: () {
+                            if (_selectedPaymentMethod == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text(
+                                    'Please choose one payment method',
+                                  ),
+                                  backgroundColor: const Color(0xFFEF4444),
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  margin: const EdgeInsets.all(16),
+                                ),
+                              );
+                              return;
+                            }
+
+                            final paymentMethod = _selectedPaymentMethod!;
                             Navigator.pop(context);
-                            _showOrderSuccess();
+                            _showOrderSuccess(paymentMethod);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: kBlue500,
@@ -1218,7 +1522,68 @@ class _MiniShopScreenState extends State<MiniShopScreen>
   // ─────────────────────────────────────────────────────────────
   // ORDER SUCCESS DIALOG
   // ─────────────────────────────────────────────────────────────
-  void _showOrderSuccess() {
+  Widget _paymentMethodTile({
+    required PaymentMethod method,
+    required StateSetter setSheetState,
+  }) {
+    final isSelected = _selectedPaymentMethod == method;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() => _selectedPaymentMethod = method);
+        setSheetState(() {});
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        width: 155,
+        padding: const EdgeInsets.all(11),
+        decoration: BoxDecoration(
+          color: isSelected ? kBlue50 : kGray50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? kBlue500 : kGray200,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              _paymentIcon(method),
+              size: 18,
+              color: isSelected ? kBlue500 : kGray500,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _paymentLabel(method),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: isSelected ? kBlue500 : kGray800,
+                ),
+              ),
+            ),
+            Radio<PaymentMethod>(
+              value: method,
+              groupValue: _selectedPaymentMethod,
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() => _selectedPaymentMethod = value);
+                setSheetState(() {});
+              },
+              visualDensity: VisualDensity.compact,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              activeColor: kBlue500,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showOrderSuccess(PaymentMethod paymentMethod) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -1246,16 +1611,19 @@ class _MiniShopScreenState extends State<MiniShopScreen>
                 )),
             const SizedBox(height: 8),
             Text(
-              'Your order of RM ${_cartTotal.toStringAsFixed(2)} has been placed. Collect at the Mini Shop counter.',
+              'Your order of RM ${_cartTotal.toStringAsFixed(2)} has been placed.\nPayment: ${_paymentLabel(paymentMethod)}\nCollect at the Mini Shop counter.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 13, color: kGray500),
             ),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+                child: ElevatedButton(
                 onPressed: () {
-                  setState(() => _cart.clear());
+                  setState(() {
+                    _cart.clear();
+                    _selectedPaymentMethod = null;
+                  });
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
@@ -1289,7 +1657,7 @@ class _MiniShopScreenState extends State<MiniShopScreen>
           height: 62,
           child: Row(
             children: List.generate(kMainNavItems.length, (i) {
-              final isActive = i == 3;
+              final isActive = kMainNavItems[i]['route'] == '/shop';
               return Expanded(
                 child: GestureDetector(
                   onTap: () => navigateToMainTab(context, i, '/shop'),

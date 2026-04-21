@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uthm_smart_campus/utils/app_language.dart';
+import 'package:uthm_smart_campus/utils/main_navigation.dart';
 
 class CafeScreen extends StatefulWidget {
   const CafeScreen({super.key});
@@ -1161,11 +1162,7 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
             children: List.generate(items.length, (i) {
               return Expanded(
                 child: GestureDetector(
-                  onTap: () {
-                    if (i == 0)
-                      Navigator.popUntil(
-                          context, ModalRoute.withName('/dashboard'));
-                  },
+                  onTap: () => navigateToMainTab(context, i, '/cafe'),
                   behavior: HitTestBehavior.opaque,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,

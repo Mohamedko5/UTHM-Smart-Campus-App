@@ -12,14 +12,14 @@ const List<Map<String, dynamic>> kMainNavItems = [
     'route': '/timetable',
   },
   {
-    'icon': Icons.map_rounded,
-    'label': 'Map',
-    'route': '/map',
+    'icon': Icons.notifications_rounded,
+    'label': 'Alerts',
+    'route': '/notifications',
   },
   {
-    'icon': Icons.shopping_bag_rounded,
-    'label': 'Store',
-    'route': '/shop',
+    'icon': Icons.person_rounded,
+    'label': 'Profile',
+    'route': '/profile',
   },
 ];
 

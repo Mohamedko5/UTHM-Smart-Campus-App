@@ -61,6 +61,12 @@ class UTHMApp extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
             ],
+            builder: (context, child) {
+              return _GlobalThemeLayer(
+                isDarkMode: appThemeController.isDarkMode,
+                child: child ?? const SizedBox.shrink(),
+              );
+            },
             theme: _buildLightTheme(),
             darkTheme: _buildDarkTheme(),
             themeMode: appThemeController.themeMode,
@@ -92,12 +98,12 @@ class UTHMApp extends StatelessWidget {
 
   ThemeData _buildLightTheme() {
     return ThemeData(
-              fontFamily: 'Poppins',
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF2563EB),
-                brightness: Brightness.light,
-              ),
-              useMaterial3: true,
+      fontFamily: 'Poppins',
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFF2563EB),
+        brightness: Brightness.light,
+      ),
+      useMaterial3: true,
       scaffoldBackgroundColor: const Color(0xFFF8FAFC),
       appBarTheme: const AppBarTheme(
         backgroundColor: Color(0xFF113A6E),
@@ -129,6 +135,35 @@ class UTHMApp extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
       ),
+    );
+  }
+}
+
+class _GlobalThemeLayer extends StatelessWidget {
+  const _GlobalThemeLayer({
+    required this.isDarkMode,
+    required this.child,
+  });
+
+  final bool isDarkMode;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        child,
+        IgnorePointer(
+          child: AnimatedOpacity(
+            opacity: isDarkMode ? 1 : 0,
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOut,
+            child: Container(
+              color: const Color(0xFF020617).withValues(alpha: 0.42),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

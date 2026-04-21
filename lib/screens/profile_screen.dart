@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uthm_smart_campus/models/student.dart';
 import 'package:uthm_smart_campus/utils/app_language.dart';
+import 'package:uthm_smart_campus/utils/main_navigation.dart';
 import 'package:uthm_smart_campus/utils/theme_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -1390,11 +1391,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               final isActive = i == 3; // Profile tab
               return Expanded(
                 child: GestureDetector(
-                  onTap: () {
-                    if (i == 0)
-                      Navigator.popUntil(
-                          context, ModalRoute.withName('/dashboard'));
-                  },
+                  onTap: () => navigateToMainTab(context, i, '/profile'),
                   behavior: HitTestBehavior.opaque,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,

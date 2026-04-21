@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uthm_smart_campus/utils/app_language.dart';
+import 'package:uthm_smart_campus/utils/main_navigation.dart';
 
 class StudyPlannerScreen extends StatefulWidget {
   const StudyPlannerScreen({super.key});
@@ -1269,13 +1270,8 @@ class _StudyPlannerScreenState extends State<StudyPlannerScreen>
             children: List.generate(items.length, (i) {
               return Expanded(
                 child: GestureDetector(
-                  onTap: () {
-                    if (i == 0)
-                      Navigator.popUntil(
-                        context,
-                        ModalRoute.withName('/dashboard'),
-                      );
-                  },
+                  onTap: () =>
+                      navigateToMainTab(context, i, '/study_planner'),
                   behavior: HitTestBehavior.opaque,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,

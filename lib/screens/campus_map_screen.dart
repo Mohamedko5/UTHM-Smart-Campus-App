@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:uthm_smart_campus/utils/app_language.dart';
+import 'package:uthm_smart_campus/utils/main_navigation.dart';
 
 class CampusMapScreen extends StatefulWidget {
   const CampusMapScreen({super.key});
@@ -962,11 +963,7 @@ class _CampusMapScreenState extends State<CampusMapScreen>
                 items.length,
                 (i) => Expanded(
                       child: GestureDetector(
-                        onTap: () {
-                          if (i == 0)
-                            Navigator.popUntil(
-                                context, ModalRoute.withName('/dashboard'));
-                        },
+                        onTap: () => navigateToMainTab(context, i, '/map'),
                         behavior: HitTestBehavior.opaque,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uthm_smart_campus/utils/app_language.dart';
+import 'package:uthm_smart_campus/utils/main_navigation.dart';
 
 class RoomBookingScreen extends StatefulWidget {
   const RoomBookingScreen({super.key});
@@ -125,13 +126,30 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
 
   List<String> _getBookedForRoom() {
     if (_selectedRoom == null) return [];
-    final key = '${_selectedRoom}_today';
+    final key = _selectedBookingKey();
     return _bookedSlots[key] ?? [];
   }
 
   bool _isSlotBooked(String time) => _getBookedForRoom().contains(time);
 
   bool _isSlotAvailable(String time) => !_isSlotBooked(time);
+
+  String _selectedBookingKey() {
+    return '${_selectedRoom}_${_dateKey(_selectedDate)}';
+  }
+
+  String _dateKey(DateTime date) {
+    final now = DateTime.now();
+    final isToday =
+        date.year == now.year && date.month == now.month && date.day == now.day;
+
+    if (isToday) {
+      return 'today';
+    }
+
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-'
+        '${date.day.toString().padLeft(2, '0')}';
+  }
 
   // ── Booked history ────────────────────────────────────────────
   final List<Map<String, dynamic>> _myBookings = [
@@ -1089,8 +1107,94 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
     setState(() => _isSubmitting = true);
     await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
-    setState(() => _isSubmitting = false);
+
+    final newBooking = _createBookingFromCurrentSelection();
+
+    setState(() {
+      _isSubmitting = false;
+      _myBookings.insert(0, newBooking);
+      _markSelectedSlotsBooked();
+    });
+
     _showBookingSuccess();
+  }
+
+  Map<String, dynamic> _createBookingFromCurrentSelection() {
+    final room = _rooms.firstWhere(
+      (r) => r['id'] == _selectedRoom,
+      orElse: () => {
+        'name': 'Room',
+        'block': 'Campus',
+        'icon': Icons.meeting_room_rounded,
+        'color': kBlue500,
+      },
+    );
+
+    return {
+      'room': room['name'],
+      'block': room['block'],
+      'date': _formatBookingDate(_selectedDate),
+      'start': _selectedStart,
+      'end': _selectedEnd,
+      'status': 'Pending',
+      'purpose': _purpose.trim().isEmpty ? 'Room booking' : _purpose.trim(),
+      'attendees': _attendees,
+      'icon': room['icon'],
+      'color': room['color'],
+    };
+  }
+
+  void _markSelectedSlotsBooked() {
+    if (_selectedRoom == null || _selectedStart == null || _selectedEnd == null) {
+      return;
+    }
+
+    final startIndex = _timeSlots.indexOf(_selectedStart!);
+    final endIndex = _timeSlots.indexOf(_selectedEnd!);
+    if (startIndex == -1 || endIndex == -1) {
+      return;
+    }
+
+    final key = _selectedBookingKey();
+    final bookedSlots = _bookedSlots.putIfAbsent(key, () => <String>[]);
+
+    for (int i = startIndex; i <= endIndex; i++) {
+      final slot = _timeSlots[i];
+      if (!bookedSlots.contains(slot)) {
+        bookedSlots.add(slot);
+      }
+    }
+  }
+
+  String _formatBookingDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final selected = DateTime(date.year, date.month, date.day);
+
+    if (selected == today) {
+      return 'Today';
+    }
+
+    if (selected == today.add(const Duration(days: 1))) {
+      return 'Tomorrow';
+    }
+
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
   void _showBookingSuccess() {
@@ -1161,6 +1265,7 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
                     _selectedRoom = null;
                     _selectedStart = null;
                     _selectedEnd = null;
+                    _purpose = '';
                     _purposeCtrl.clear();
                     _attendees = 1;
                   });
@@ -1190,7 +1295,9 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
   Widget _buildBookingHistoryCard(Map<String, dynamic> booking) {
     final isConfirmed = booking['status'] == 'Confirmed';
 
-    return Container(
+    return GestureDetector(
+      onTap: () => _showBookingDetails(booking),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -1267,12 +1374,188 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
           ),
         ],
       ),
+      ),
     );
   }
 
   // ─────────────────────────────────────────────────────────────
   // BOTTOM NAV
   // ─────────────────────────────────────────────────────────────
+  void _showBookingDetails(Map<String, dynamic> booking) {
+    final isConfirmed = booking['status'] == 'Confirmed';
+    final statusColor =
+        isConfirmed ? const Color(0xFF065F46) : const Color(0xFF92400E);
+    final statusBg =
+        isConfirmed ? const Color(0xFFD1FAE5) : const Color(0xFFFEF3C7);
+    final purpose = booking['purpose'] as String? ?? 'Room booking';
+    final attendees = booking['attendees']?.toString() ?? '-';
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: kGray200,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: (booking['color'] as Color).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(
+                        booking['icon'] as IconData,
+                        color: booking['color'] as Color,
+                        size: 26,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            booking['room'] as String,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: kGray800,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            booking['block'] as String,
+                            style: TextStyle(fontSize: 13, color: kGray500),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: statusBg,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        booking['status'] as String,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: statusColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _bookingDetailRow(
+                  Icons.calendar_today_rounded,
+                  'Date',
+                  booking['date'] as String,
+                ),
+                _bookingDetailRow(
+                  Icons.access_time_rounded,
+                  'Time',
+                  '${booking['start']} - ${booking['end']}',
+                ),
+                _bookingDetailRow(Icons.notes_rounded, 'Purpose', purpose),
+                _bookingDetailRow(Icons.people_rounded, 'Attendees', attendees),
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kBlue500,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Close',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _bookingDetailRow(IconData icon, String label, String value) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: kGray50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: kGray100),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: kBlue500),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: kGray400,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: kGray800,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildBottomNav() {
     final items = [
       {'icon': Icons.home_rounded, 'label': 'Home'},
@@ -1293,11 +1576,7 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
             children: List.generate(items.length, (i) {
               return Expanded(
                 child: GestureDetector(
-                  onTap: () {
-                    if (i == 0)
-                      Navigator.popUntil(
-                          context, ModalRoute.withName('/dashboard'));
-                  },
+                  onTap: () => navigateToMainTab(context, i, '/booking'),
                   behavior: HitTestBehavior.opaque,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
