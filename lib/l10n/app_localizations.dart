@@ -12,6 +12,7 @@ class AppLocalizations {
   static const List<Locale> supportedLocales = [
     Locale('en'),
     Locale('ms'),
+    Locale('ar'),
   ];
 
   static AppLocalizations of(BuildContext context) {
@@ -41,6 +42,7 @@ class AppLocalizations {
   String get language => translate('language');
   String get english => translate('english');
   String get bahasaMelayu => translate('bahasaMelayu');
+  String get arabic => translate('arabic');
   String get startsIn => translate('startsIn');
 }
 
@@ -79,6 +81,7 @@ const Map<String, Map<String, String>> _localizedValues = {
     'language': 'Language',
     'english': 'English',
     'bahasaMelayu': 'Bahasa Melayu',
+    'arabic': 'Arabic',
     'startsIn': 'Starts in',
   },
   'ms': {
@@ -96,6 +99,25 @@ const Map<String, Map<String, String>> _localizedValues = {
     'language': 'Bahasa',
     'english': 'English',
     'bahasaMelayu': 'Bahasa Melayu',
+    'arabic': 'Arabic',
     'startsIn': 'Bermula dalam',
+  },
+  'ar': {
+    'appTitle': 'حرم UTHM الذكي',
+    'goodMorning': 'صباح الخير',
+    'goodAfternoon': 'مساء الخير',
+    'goodEvening': 'مساء الخير',
+    'searchCampusServices': 'ابحث عن خدمات الحرم...',
+    'nextClass': 'المحاضرة القادمة',
+    'campusServices': 'خدمات الحرم',
+    'home': 'الرئيسية',
+    'schedule': 'الجدول',
+    'map': 'الخريطة',
+    'store': 'المتجر',
+    'language': 'اللغة',
+    'english': 'English',
+    'bahasaMelayu': 'Bahasa Melayu',
+    'arabic': 'العربية',
+    'startsIn': 'يبدأ خلال',
   },
 };

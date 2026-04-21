@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:uthm_smart_campus/models/student.dart';
 import 'package:uthm_smart_campus/utils/app_language.dart';
+import 'package:uthm_smart_campus/utils/theme_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({super.key, required this.student});
+
+  // The logged-in student is passed from LoginScreen -> DashboardScreen -> ProfileScreen.
+  final Student student;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -32,9 +37,9 @@ class _ProfileScreenState extends State<ProfileScreen>
   late Animation<double> _fadeAnim;
 
   // ── Student Profile Data ──────────────────────────────────────
-  String _name = 'Ahmad Faris bin Abdullah';
-  String _studentId = 'AF220001';
-  String _email = 'af220001@uthm.edu.my';
+  late String _name;
+  late String _studentId;
+  late String _email;
   String _phone = '+60 12-345 6789';
   String _faculty = 'Faculty of Computer Science & IT';
   String _programme = 'Bachelor of Computer Science';
@@ -46,13 +51,17 @@ class _ProfileScreenState extends State<ProfileScreen>
   bool _notifReminder = true;
   bool _notifTimetable = true;
   bool _notifShop = false;
-  bool _darkMode = false;
   bool _biometric = false;
   bool _emailUpdates = true;
 
   @override
   void initState() {
     super.initState();
+    // Use the logged-in local demo account instead of hardcoded profile data.
+    _name = widget.student.fullName;
+    _studentId = widget.student.matric;
+    _email = widget.student.email;
+
     _animController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 500));
     _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
@@ -154,8 +163,14 @@ class _ProfileScreenState extends State<ProfileScreen>
                         context.tr('Dark Mode'),
                         context.tr('Switch to dark theme'),
                         kGray800,
-                        _darkMode,
-                        (v) => setState(() => _darkMode = v),
+                        appThemeController.isDarkMode,
+                        (v) async {
+                          // This updates MaterialApp.themeMode and saves it locally.
+                          await appThemeController.setDarkMode(v);
+                          if (mounted) {
+                            setState(() {});
+                          }
+                        },
                       ),
                       _divider(),
                       _toggleTile(
@@ -359,16 +374,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         ),
                       ],
                     ),
-                    child: Center(
-                      child: Text(
-                        _getInitials(_name),
-                        style: const TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
+                    child: _buildProfileAvatar(),
                   ),
                   // Online badge
                   Positioned(
@@ -474,6 +480,32 @@ class _ProfileScreenState extends State<ProfileScreen>
   // ─────────────────────────────────────────────────────────────
   // ACADEMIC CARD
   // ─────────────────────────────────────────────────────────────
+  Widget _buildProfileAvatar() {
+    final imagePath = widget.student.profileImagePath;
+
+    if (imagePath != null && imagePath.isNotEmpty) {
+      return ClipOval(
+        child: Image.asset(
+          imagePath,
+          width: 80,
+          height: 80,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => const Icon(
+            Icons.person_rounded,
+            color: Colors.white,
+            size: 36,
+          ),
+        ),
+      );
+    }
+
+    return const Icon(
+      Icons.person_rounded,
+      color: Colors.white,
+      size: 36,
+    );
+  }
+
   Widget _buildAcademicCard() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -849,15 +881,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         ),
                         shape: BoxShape.circle,
                       ),
-                      child: Center(
-                        child: Text(
-                          _getInitials(_name),
-                          style: const TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white),
-                        ),
-                      ),
+                      child: _buildProfileAvatar(),
                     ),
                     Positioned(
                       bottom: 0,
@@ -1060,6 +1084,14 @@ class _ProfileScreenState extends State<ProfileScreen>
                     subtitle: appLanguageController.tr('Guna Bahasa Melayu'),
                     icon: Icons.translate_rounded,
                   ),
+                  const SizedBox(height: 10),
+                  _languageOption(
+                    sheetContext: sheetContext,
+                    language: AppLanguage.arabic,
+                    subtitle:
+                        appLanguageController.tr('Use Arabic language'),
+                    icon: Icons.language_rounded,
+                  ),
                 ],
               ),
             );
@@ -1085,11 +1117,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         }
         if (mounted) {
           setState(() {});
-          _showSnack(
-            language == AppLanguage.english
-                ? 'Language changed to English'
-                : 'Bahasa ditukar kepada Melayu',
-          );
+          _showSnack(appLanguageController.tr(_languageChangedMessage(language)));
         }
       },
       child: AnimatedContainer(
@@ -1144,6 +1172,14 @@ class _ProfileScreenState extends State<ProfileScreen>
         ),
       ),
     );
+  }
+
+  String _languageChangedMessage(AppLanguage language) {
+    return switch (language) {
+      AppLanguage.english => 'Language changed to English',
+      AppLanguage.malay => 'Language changed to Malay',
+      AppLanguage.arabic => 'Language changed to Arabic',
+    };
   }
 
   void _confirmLogout() {

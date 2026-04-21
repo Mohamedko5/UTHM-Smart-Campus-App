@@ -1,0 +1,19 @@
+{
+  "@@locale": "ar",
+  "appTitle": "حرم UTHM الذكي",
+  "goodMorning": "صباح الخير",
+  "goodAfternoon": "مساء الخير",
+  "goodEvening": "مساء الخير",
+  "searchCampusServices": "ابحث عن خدمات الحرم...",
+  "nextClass": "المحاضرة القادمة",
+  "campusServices": "خدمات الحرم",
+  "home": "الرئيسية",
+  "schedule": "الجدول",
+  "map": "الخريطة",
+  "store": "المتجر",
+  "language": "اللغة",
+  "english": "English",
+  "bahasaMelayu": "Bahasa Melayu",
+  "arabic": "العربية",
+  "startsIn": "يبدأ خلال"
+}

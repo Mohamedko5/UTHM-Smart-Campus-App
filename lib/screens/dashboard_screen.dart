@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uthm_smart_campus/l10n/app_localizations.dart';
+import 'package:uthm_smart_campus/models/student.dart';
+import 'package:uthm_smart_campus/screens/profile_screen.dart';
 import 'package:uthm_smart_campus/utils/app_language.dart';
 import 'package:uthm_smart_campus/utils/main_navigation.dart';
 
@@ -27,6 +29,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   // ── Animation ─────────────────────────────────────────────────
   late AnimationController _animController;
   late Animation<double> _fadeAnim;
+  Student? _loggedInStudent;
 
   // ── Next Class Data ───────────────────────────────────────────
   final Map<String, String> _nextClass = {
@@ -100,6 +103,17 @@ class _DashboardScreenState extends State<DashboardScreen>
   void dispose() {
     _animController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Login passes the selected local Student through route arguments.
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Student) {
+      _loggedInStudent = args;
+    }
   }
 
   // ── Navigation handler ────────────────────────────────────────
@@ -220,6 +234,9 @@ class _DashboardScreenState extends State<DashboardScreen>
   // ─────────────────────────────────────────────────────────────
   Widget _buildHeader() {
     final l10n = AppLocalizations.of(context);
+    final student = _loggedInStudent;
+    final studentName = student?.fullName ?? 'UTHM Student';
+    final matric = student?.matric ?? 'Demo Mode';
 
     return Container(
       decoration: const BoxDecoration(
@@ -256,16 +273,33 @@ class _DashboardScreenState extends State<DashboardScreen>
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        const Expanded(
-                          child: Text(
-                            'Ahmad Faris',
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                              letterSpacing: -0.3,
-                            ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                studentName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                matric,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withValues(alpha: 0.78),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -295,7 +329,17 @@ class _DashboardScreenState extends State<DashboardScreen>
 
               // Avatar
               GestureDetector(
-                onTap: () => Navigator.pushNamed(context, '/profile'),
+                onTap: () {
+                  if (student == null) return;
+
+                  // Pass the same logged-in Student object into ProfileScreen.
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProfileScreen(student: student),
+                    ),
+                  );
+                },
                 child: Container(
                   width: 42,
                   height: 42,
@@ -307,9 +351,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       width: 2,
                     ),
                   ),
-                  child: const Center(
-                    child: Text('👤', style: TextStyle(fontSize: 20)),
-                  ),
+                  child: _buildStudentAvatar(student),
                 ),
               ),
             ],
@@ -346,6 +388,32 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
+  Widget _buildStudentAvatar(Student? student) {
+    final imagePath = student?.profileImagePath;
+
+    if (imagePath != null && imagePath.isNotEmpty) {
+      return ClipOval(
+        child: Image.asset(
+          imagePath,
+          fit: BoxFit.cover,
+          width: 42,
+          height: 42,
+          errorBuilder: (_, __, ___) => const Icon(
+            Icons.person_rounded,
+            color: Colors.white,
+            size: 24,
+          ),
+        ),
+      );
+    }
+
+    return const Icon(
+      Icons.person_rounded,
+      color: Colors.white,
+      size: 24,
+    );
+  }
+
   Widget _buildLanguageSwitcher() {
     final l10n = AppLocalizations.of(context);
 
@@ -353,8 +421,11 @@ class _DashboardScreenState extends State<DashboardScreen>
       animation: appLanguageController,
       builder: (context, _) {
         final currentLanguage = appLanguageController.language;
-        final currentCode =
-            currentLanguage == AppLanguage.english ? 'EN' : 'MS';
+        final currentCode = switch (currentLanguage) {
+          AppLanguage.english => 'EN',
+          AppLanguage.malay => 'MS',
+          AppLanguage.arabic => 'AR',
+        };
 
         return PopupMenuButton<AppLanguage>(
           tooltip: l10n.language,
@@ -374,9 +445,11 @@ class _DashboardScreenState extends State<DashboardScreen>
           itemBuilder: (context) {
             return AppLanguage.values.map((language) {
               final isSelected = language == currentLanguage;
-              final label = language == AppLanguage.english
-                  ? l10n.english
-                  : l10n.bahasaMelayu;
+              final label = switch (language) {
+                AppLanguage.english => l10n.english,
+                AppLanguage.malay => l10n.bahasaMelayu,
+                AppLanguage.arabic => l10n.arabic,
+              };
 
               return PopupMenuItem<AppLanguage>(
                 value: language,
@@ -848,3 +921,4 @@ class _DashboardScreenState extends State<DashboardScreen>
     };
   }
 }
+
