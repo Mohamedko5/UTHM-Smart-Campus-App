@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:uthm_smart_campus/data/demo_students.dart';
 import 'package:uthm_smart_campus/l10n/app_localizations.dart';
 import 'package:uthm_smart_campus/models/student.dart';
-import 'package:uthm_smart_campus/screens/profile_screen.dart';
 import 'package:uthm_smart_campus/utils/app_language.dart';
 import 'package:uthm_smart_campus/utils/main_navigation.dart';
 import 'package:uthm_smart_campus/widgets/language_selector.dart';
@@ -30,7 +30,10 @@ class _DashboardScreenState extends State<DashboardScreen>
   // ── Animation ─────────────────────────────────────────────────
   late AnimationController _animController;
   late Animation<double> _fadeAnim;
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   Student? _loggedInStudent;
+  String _searchQuery = '';
 
   // ── Next Class Data ───────────────────────────────────────────
   final Map<String, String> _nextClass = {
@@ -102,6 +105,8 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   @override
   void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
     _animController.dispose();
     super.dispose();
   }
@@ -155,6 +160,46 @@ class _DashboardScreenState extends State<DashboardScreen>
   // ─────────────────────────────────────────────────────────────
   // BUILD
   // ─────────────────────────────────────────────────────────────
+  List<Map<String, dynamic>> get _searchResults {
+    final query = _searchQuery.trim().toLowerCase();
+    if (query.isEmpty) return [];
+
+    return _features.where((feature) {
+      final title = (feature['title'] as String).toLowerCase();
+      final subtitle = (feature['subtitle'] as String).toLowerCase();
+      final route = (feature['route'] as String).toLowerCase();
+      return title.contains(query) ||
+          subtitle.contains(query) ||
+          route.contains(query);
+    }).toList();
+  }
+
+  void _openSearchResult(Map<String, dynamic> feature) {
+    _searchController.clear();
+    _searchFocusNode.unfocus();
+    setState(() => _searchQuery = '');
+    _onFeatureTap(feature['route'] as String);
+  }
+
+  void _submitSearch(String value) {
+    final results = _searchResults;
+    if (results.isNotEmpty) {
+      _openSearchResult(results.first);
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('No campus service found for "$value"'),
+        backgroundColor: kBlue500,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -308,14 +353,13 @@ class _DashboardScreenState extends State<DashboardScreen>
               // Avatar
               GestureDetector(
                 onTap: () {
-                  if (student == null) return;
-
-                  // Pass the same logged-in Student object into ProfileScreen.
-                  Navigator.push(
+                  // Open the profile page from the header avatar.
+                  // If the dashboard was opened without login arguments,
+                  // use the first local demo student so the page still works.
+                  Navigator.pushNamed(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => ProfileScreen(student: student),
-                    ),
+                    '/profile',
+                    arguments: student ?? demoStudents.first,
                   );
                 },
                 child: Container(
@@ -338,29 +382,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           const SizedBox(height: 16),
 
           // Search bar
-          Container(
-            height: 44,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-            ),
-            child: Row(
-              children: [
-                const SizedBox(width: 14),
-                Icon(Icons.search_rounded,
-                    color: Colors.white.withValues(alpha: 0.7), size: 20),
-                const SizedBox(width: 10),
-                Text(
-                  l10n.searchCampusServices,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white.withValues(alpha: 0.6),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildServiceSearch(l10n.searchCampusServices),
         ],
       ),
     );
@@ -395,6 +417,175 @@ class _DashboardScreenState extends State<DashboardScreen>
   // ─────────────────────────────────────────────────────────────
   // NEXT CLASS BANNER
   // ─────────────────────────────────────────────────────────────
+  Widget _buildServiceSearch(String hintText) {
+    final results = _searchResults;
+
+    return Column(
+      children: [
+        Container(
+          height: 44,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+          ),
+          child: TextField(
+            controller: _searchController,
+            focusNode: _searchFocusNode,
+            onChanged: (value) => setState(() => _searchQuery = value),
+            onSubmitted: _submitSearch,
+            textInputAction: TextInputAction.search,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+            cursorColor: Colors.white,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                color: Colors.white.withValues(alpha: 0.7),
+                size: 20,
+              ),
+              suffixIcon: _searchQuery.isEmpty
+                  ? null
+                  : IconButton(
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() => _searchQuery = '');
+                      },
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: Colors.white.withValues(alpha: 0.75),
+                        size: 18,
+                      ),
+                    ),
+              hintText: hintText,
+              hintStyle: TextStyle(
+                fontSize: 13,
+                color: Colors.white.withValues(alpha: 0.6),
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 13),
+            ),
+          ),
+        ),
+        if (_searchQuery.trim().isNotEmpty)
+          Container(
+            margin: const EdgeInsets.only(top: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.14),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: results.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.all(14),
+                    child: Row(
+                      children: [
+                        Icon(Icons.search_off_rounded,
+                            color: kGray400, size: 20),
+                        SizedBox(width: 10),
+                        Text(
+                          'No matching campus service',
+                          style: TextStyle(
+                            color: kGray800,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : Column(
+                    children: results.map((feature) {
+                      final isFirst = feature == results.first;
+                      final isLast = feature == results.last;
+
+                      return InkWell(
+                        onTap: () => _openSearchResult(feature),
+                        borderRadius: BorderRadius.vertical(
+                          top: isFirst
+                              ? const Radius.circular(12)
+                              : Radius.zero,
+                          bottom:
+                              isLast ? const Radius.circular(12) : Radius.zero,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            border: isLast
+                                ? null
+                                : const Border(
+                                    bottom: BorderSide(color: kGray100),
+                                  ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: feature['color'] as Color,
+                                  borderRadius: BorderRadius.circular(9),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    feature['icon'] as String,
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      feature['title'] as String,
+                                      style: const TextStyle(
+                                        color: kGray800,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      feature['subtitle'] as String,
+                                      style: const TextStyle(
+                                        color: kGray400,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                color: kGray400,
+                                size: 14,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildNextClassBanner() {
     final l10n = AppLocalizations.of(context);
 

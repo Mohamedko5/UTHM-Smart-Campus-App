@@ -210,7 +210,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         context.tr('Help Center'),
                         context.tr('FAQs and user guide'),
                         kBlue500,
-                        () => _showSnack('Help Center opening...'),
+                        _showHelpCenterChat,
                       ),
                       _divider(),
                       _navTile(
@@ -218,7 +218,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         context.tr('Report a Bug'),
                         context.tr('Help us improve the app'),
                         kRed,
-                        () => _showSnack('Bug report form opening...'),
+                        _showBugReportSheet,
                       ),
                       _divider(),
                       _navTile(
@@ -1026,6 +1026,433 @@ class _ProfileScreenState extends State<ProfileScreen>
   // ─────────────────────────────────────────────────────────────
   // DIALOGS
   // ─────────────────────────────────────────────────────────────
+  void _showHelpCenterChat() {
+    final messageController = TextEditingController();
+    final messages = <Map<String, String>>[
+      {
+        'sender': 'support',
+        'text':
+            'Hi ${_name.split(' ').first}, welcome to UTHM Help Center. How can we help you today?',
+      },
+      {
+        'sender': 'support',
+        'text':
+            'You can ask about timetable, room booking, Mini Shop, Cafe orders, or campus services.',
+      },
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            void sendMessage() {
+              final text = messageController.text.trim();
+              if (text.isEmpty) return;
+
+              setSheetState(() {
+                messages.add({'sender': 'student', 'text': text});
+                messages.add({
+                  'sender': 'support',
+                  'text':
+                      'Thanks for your message. UTHM Help Center has received it. Our support team will reply soon.',
+                });
+                messageController.clear();
+              });
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+              ),
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.78,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                      child: Column(
+                        children: [
+                          Center(
+                            child: Container(
+                              width: 40,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: kGray200,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: kBlue50,
+                                  borderRadius: BorderRadius.circular(13),
+                                ),
+                                child: const Icon(
+                                  Icons.support_agent_rounded,
+                                  color: kBlue500,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'UTHM Help Center',
+                                      style: TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w800,
+                                        color: kGray800,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Local demo chat with university support',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: kGray400,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () => Navigator.pop(sheetContext),
+                                icon: const Icon(Icons.close_rounded),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: messages.length,
+                        itemBuilder: (_, index) {
+                          final message = messages[index];
+                          final isStudent = message['sender'] == 'student';
+                          return Align(
+                            alignment: isStudent
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: Container(
+                              constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.width * 0.72,
+                              ),
+                              margin: const EdgeInsets.only(bottom: 10),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isStudent ? kBlue500 : kGray100,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: const Radius.circular(16),
+                                  topRight: const Radius.circular(16),
+                                  bottomLeft:
+                                      Radius.circular(isStudent ? 16 : 4),
+                                  bottomRight:
+                                      Radius.circular(isStudent ? 4 : 16),
+                                ),
+                              ),
+                              child: Text(
+                                message['text'] ?? '',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  height: 1.35,
+                                  color: isStudent ? Colors.white : kGray800,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        border: Border(top: BorderSide(color: kGray100)),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: messageController,
+                              minLines: 1,
+                              maxLines: 3,
+                              decoration: InputDecoration(
+                                hintText: 'Type your message...',
+                                hintStyle: const TextStyle(
+                                  color: kGray400,
+                                  fontSize: 13,
+                                ),
+                                filled: true,
+                                fillColor: kGray50,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide:
+                                      const BorderSide(color: kGray200),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide:
+                                      const BorderSide(color: kGray200),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: const BorderSide(
+                                    color: kBlue500,
+                                    width: 2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          GestureDetector(
+                            onTap: sendMessage,
+                            child: Container(
+                              width: 46,
+                              height: 46,
+                              decoration: BoxDecoration(
+                                color: kBlue500,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(
+                                Icons.send_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    ).whenComplete(messageController.dispose);
+  }
+
+  void _showBugReportSheet() {
+    final titleController = TextEditingController();
+    final detailController = TextEditingController();
+    String category = 'UI issue';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            void submitReport() {
+              final title = titleController.text.trim();
+              final details = detailController.text.trim();
+
+              if (title.isEmpty || details.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content:
+                        const Text('Please fill in the bug title and details'),
+                    backgroundColor: kRed,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    margin: const EdgeInsets.all(16),
+                  ),
+                );
+                return;
+              }
+
+              Navigator.pop(sheetContext);
+              _showSnack('Bug report submitted to UTHM Help Center');
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+              ),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: kGray200,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    const Text(
+                      'Report a Bug',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: kGray800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Tell us what went wrong so the university support team can improve the app.',
+                      style: TextStyle(fontSize: 13, color: kGray500),
+                    ),
+                    const SizedBox(height: 18),
+                    const Text(
+                      'Category',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: kGray500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        'UI issue',
+                        'Login',
+                        'Booking',
+                        'Shop/Cafe',
+                        'Other',
+                      ].map((item) {
+                        final selected = category == item;
+                        return ChoiceChip(
+                          label: Text(item),
+                          selected: selected,
+                          selectedColor: kBlue50,
+                          side: BorderSide(
+                            color: selected ? kBlue500 : kGray200,
+                          ),
+                          labelStyle: TextStyle(
+                            color: selected ? kBlue500 : kGray800,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                          ),
+                          onSelected: (_) {
+                            setSheetState(() => category = item);
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 14),
+                    _supportField(
+                      controller: titleController,
+                      hint: 'Bug title',
+                      icon: Icons.title_rounded,
+                    ),
+                    const SizedBox(height: 12),
+                    _supportField(
+                      controller: detailController,
+                      hint: 'Describe the problem...',
+                      icon: Icons.description_rounded,
+                      maxLines: 4,
+                    ),
+                    const SizedBox(height: 18),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed: submitReport,
+                        icon: const Icon(Icons.send_rounded,
+                            color: Colors.white, size: 18),
+                        label: const Text(
+                          'Submit Report',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kRed,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    ).whenComplete(() {
+      titleController.dispose();
+      detailController.dispose();
+    });
+  }
+
+  Widget _supportField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: kGray400, fontSize: 13),
+        prefixIcon: Icon(icon, color: kGray400, size: 18),
+        filled: true,
+        fillColor: kGray50,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: kGray200),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: kGray200),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: kBlue500, width: 2),
+        ),
+      ),
+    );
+  }
+
   void _showLanguageSheet() {
     showModalBottomSheet(
       context: context,
