@@ -988,7 +988,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           fontSize: 12,
           fontWeight: FontWeight.w700,
           color: kGray500,
-          letterSpacing: 0.4));
+          letterSpacing: 0.6));
 
   Widget _editField(
     TextEditingController ctrl,
