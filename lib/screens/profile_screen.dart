@@ -1210,13 +1210,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(14),
-                                  borderSide:
-                                      const BorderSide(color: kGray200),
+                                  borderSide: const BorderSide(color: kGray200),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(14),
-                                  borderSide:
-                                      const BorderSide(color: kGray200),
+                                  borderSide: const BorderSide(color: kGray200),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(14),
@@ -1501,8 +1499,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   _languageOption(
                     sheetContext: sheetContext,
                     language: AppLanguage.english,
-                    subtitle:
-                        appLanguageController.tr('Use English language'),
+                    subtitle: appLanguageController.tr('Use English language'),
                     icon: Icons.language_rounded,
                   ),
                   const SizedBox(height: 10),
@@ -1516,8 +1513,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   _languageOption(
                     sheetContext: sheetContext,
                     language: AppLanguage.arabic,
-                    subtitle:
-                        appLanguageController.tr('Use Arabic language'),
+                    subtitle: appLanguageController.tr('Use Arabic language'),
                     icon: Icons.language_rounded,
                   ),
                 ],
@@ -1545,7 +1541,8 @@ class _ProfileScreenState extends State<ProfileScreen>
         }
         if (mounted) {
           setState(() {});
-          _showSnack(appLanguageController.tr(_languageChangedMessage(language)));
+          _showSnack(
+              appLanguageController.tr(_languageChangedMessage(language)));
         }
       },
       child: AnimatedContainer(

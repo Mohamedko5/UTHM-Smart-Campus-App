@@ -52,15 +52,19 @@ class NotificationsScreen extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
               side: BorderSide(
-                color: isRead ? const Color(0xFFE2E8F0) : const Color(0xFF93C5FD),
+                color:
+                    isRead ? const Color(0xFFE2E8F0) : const Color(0xFF93C5FD),
               ),
             ),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: isRead ? const Color(0xFFF1F5F9) : const Color(0xFFDBEAFE),
+                backgroundColor:
+                    isRead ? const Color(0xFFF1F5F9) : const Color(0xFFDBEAFE),
                 child: Icon(
                   item['icon'] as IconData,
-                  color: isRead ? const Color(0xFF64748B) : const Color(0xFF2563EB),
+                  color: isRead
+                      ? const Color(0xFF64748B)
+                      : const Color(0xFF2563EB),
                 ),
               ),
               title: Text(

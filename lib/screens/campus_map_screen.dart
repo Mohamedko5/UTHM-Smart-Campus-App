@@ -453,8 +453,9 @@ class _CampusMapScreenState extends State<CampusMapScreen>
                       margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color:
-                            isSel ? color.withValues(alpha: 0.08) : Colors.white,
+                        color: isSel
+                            ? color.withValues(alpha: 0.08)
+                            : Colors.white,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
                           color: isSel ? color : kGray100,

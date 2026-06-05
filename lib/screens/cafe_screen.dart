@@ -1017,8 +1017,8 @@ class _CafeScreenState extends State<CafeScreen> with TickerProviderStateMixin {
                     _summaryRow('Subtotal',
                         'RM ${_orderTotal.toStringAsFixed(2)}', false),
                     const Divider(height: 20),
-                    _summaryRow('Total',
-                        'RM ${_orderTotal.toStringAsFixed(2)}', true),
+                    _summaryRow(
+                        'Total', 'RM ${_orderTotal.toStringAsFixed(2)}', true),
                     const SizedBox(height: 16),
 
                     Align(

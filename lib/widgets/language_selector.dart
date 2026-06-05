@@ -273,7 +273,9 @@ class _LanguageOption extends StatelessWidget {
               width: 34,
               height: 34,
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
+                color: isSelected
+                    ? const Color(0xFF2563EB)
+                    : const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Center(
@@ -292,7 +294,9 @@ class _LanguageOption extends StatelessWidget {
               child: Text(
                 _label(language),
                 style: TextStyle(
-                  color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF1E293B),
+                  color: isSelected
+                      ? const Color(0xFF2563EB)
+                      : const Color(0xFF1E293B),
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 ),

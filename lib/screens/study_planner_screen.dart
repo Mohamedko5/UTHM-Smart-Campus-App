@@ -1270,8 +1270,7 @@ class _StudyPlannerScreenState extends State<StudyPlannerScreen>
             children: List.generate(items.length, (i) {
               return Expanded(
                 child: GestureDetector(
-                  onTap: () =>
-                      navigateToMainTab(context, i, '/study_planner'),
+                  onTap: () => navigateToMainTab(context, i, '/study_planner'),
                   behavior: HitTestBehavior.opaque,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,

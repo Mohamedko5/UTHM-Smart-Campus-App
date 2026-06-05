@@ -1,6 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:uthm_smart_campus/utils/app_language.dart';
 import 'package:uthm_smart_campus/utils/main_navigation.dart';
+import 'package:uthm_smart_campus/utils/timetable_pdf_file_saver.dart';
 
 class TimetableScreen extends StatefulWidget {
   const TimetableScreen({super.key});
@@ -219,6 +224,150 @@ class _TimetableScreenState extends State<TimetableScreen>
     );
   }
 
+  Future<Uint8List> generateTimetablePdf() async {
+    final pdf = pw.Document();
+    final rows = _buildTimetablePdfRows();
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(24),
+        build: (context) => [
+          pw.Text(
+            'My Timetable',
+            style: pw.TextStyle(
+              fontSize: 24,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColor.fromInt(kBlue700.toARGB32()),
+            ),
+          ),
+          pw.SizedBox(height: 6),
+          pw.Text(
+            'Semester: Semester 2, 2024/2025',
+            style: const pw.TextStyle(fontSize: 12),
+          ),
+          pw.SizedBox(height: 18),
+          pw.Table(
+            border: pw.TableBorder.all(color: PdfColors.grey300),
+            columnWidths: const {
+              0: pw.FlexColumnWidth(1.1),
+              1: pw.FlexColumnWidth(2),
+              2: pw.FlexColumnWidth(2),
+              3: pw.FlexColumnWidth(1),
+              4: pw.FlexColumnWidth(1),
+              5: pw.FlexColumnWidth(1.7),
+              6: pw.FlexColumnWidth(1),
+            },
+            children: [
+              pw.TableRow(
+                decoration: pw.BoxDecoration(
+                  color: PdfColor.fromInt(kBlue700.toARGB32()),
+                ),
+                children: [
+                  _buildPdfCell('Day', isHeader: true),
+                  _buildPdfCell('Class name', isHeader: true),
+                  _buildPdfCell('Lecturer name', isHeader: true),
+                  _buildPdfCell('Start', isHeader: true),
+                  _buildPdfCell('End', isHeader: true),
+                  _buildPdfCell('Location', isHeader: true),
+                  _buildPdfCell('Duration', isHeader: true),
+                ],
+              ),
+              ...rows.map(
+                (row) => pw.TableRow(
+                  children: row.map((value) => _buildPdfCell(value)).toList(),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    return pdf.save();
+  }
+
+  Future<void> downloadTimetablePdf() async {
+    try {
+      final pdfBytes = await generateTimetablePdf();
+      await saveAndOpenTimetablePdf(pdfBytes, 'my_timetable.pdf');
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Timetable PDF generated successfully.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to generate timetable PDF.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  List<List<String>> _buildTimetablePdfRows() {
+    final rows = <List<String>>[];
+
+    for (var dayIndex = 0; dayIndex < _days.length; dayIndex++) {
+      final classes = List<Map<String, dynamic>>.from(_schedule[dayIndex] ?? [])
+        ..sort((a, b) => a['start'].compareTo(b['start']));
+
+      for (final classData in classes) {
+        final start = classData['start'] as String;
+        final end = classData['end'] as String;
+
+        rows.add([
+          _days[dayIndex],
+          classData['subject'] as String,
+          classData['lecturer'] as String,
+          start,
+          end,
+          classData['room'] as String,
+          _durationLabel(start, end),
+        ]);
+      }
+    }
+
+    return rows;
+  }
+
+  pw.Widget _buildPdfCell(String text, {bool isHeader = false}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.all(6),
+      child: pw.Text(
+        text,
+        style: pw.TextStyle(
+          fontSize: isHeader ? 9 : 8,
+          fontWeight: isHeader ? pw.FontWeight.bold : pw.FontWeight.normal,
+          color: isHeader ? PdfColors.white : PdfColors.black,
+        ),
+      ),
+    );
+  }
+
+  String _durationLabel(String start, String end) {
+    final startParts = start.split(':');
+    final endParts = end.split(':');
+    final startMinutes =
+        int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
+    final endMinutes = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+    final totalMinutes = endMinutes - startMinutes;
+
+    if (totalMinutes <= 0) return '-';
+
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+
+    if (hours == 0) return '${minutes}m';
+    if (minutes == 0) return '${hours}h';
+    return '${hours}h ${minutes}m';
+  }
+
   // ─────────────────────────────────────────────────────────────
   // BUILD
   // ─────────────────────────────────────────────────────────────
@@ -335,6 +484,24 @@ class _TimetableScreenState extends State<TimetableScreen>
               ),
 
               // Total classes badge
+              GestureDetector(
+                onTap: downloadTimetablePdf,
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  margin: const EdgeInsets.only(right: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.download_rounded,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ),
+              ),
+
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

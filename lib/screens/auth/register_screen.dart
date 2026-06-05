@@ -24,7 +24,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _register() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Registration successful. This is UI-only demo mode.')),
+      const SnackBar(
+          content: Text('Registration successful. This is UI-only demo mode.')),
     );
     Navigator.pop(context);
   }
@@ -38,24 +39,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
         children: [
           TextField(
             controller: _nameController,
-            decoration: const InputDecoration(labelText: 'Full Name', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+                labelText: 'Full Name', border: OutlineInputBorder()),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _studentIdController,
-            decoration: const InputDecoration(labelText: 'Student ID', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+                labelText: 'Student ID', border: OutlineInputBorder()),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(labelText: 'UTHM Email', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+                labelText: 'UTHM Email', border: OutlineInputBorder()),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _passwordController,
             obscureText: true,
-            decoration: const InputDecoration(labelText: 'Password', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+                labelText: 'Password', border: OutlineInputBorder()),
           ),
           const SizedBox(height: 20),
           FilledButton.icon(

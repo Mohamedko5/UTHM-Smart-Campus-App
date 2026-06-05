@@ -1,4 +1,5 @@
 import Flutter
+import flutter_local_notifications
 import UIKit
 
 @main
@@ -11,6 +12,9 @@ import UIKit
   }
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    FlutterLocalNotificationsPlugin.setPluginRegistrantCallback { registry in
+      GeneratedPluginRegistrant.register(with: registry)
+    }
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
   }
 }

@@ -102,7 +102,8 @@ const Map<String, String> _ms = {
   'Good evening': 'Selamat malam',
   'Search campus services...': 'Cari perkhidmatan kampus...',
   'Search products...': 'Cari produk...',
-  'Search buildings, labs, facilities...': 'Cari bangunan, makmal, kemudahan...',
+  'Search buildings, labs, facilities...':
+      'Cari bangunan, makmal, kemudahan...',
   'Next Class': 'Kelas Seterusnya',
   'Campus Services': 'Perkhidmatan Kampus',
   'View schedule': 'Lihat jadual',
@@ -120,8 +121,7 @@ const Map<String, String> _ms = {
   'Stationery': 'Alat tulis',
   'Café': 'Kafe',
   'UTHM Café': 'Kafe UTHM',
-  'Halal certified · Campus food court':
-      'Disahkan halal · Medan selera kampus',
+  'Halal certified · Campus food court': 'Disahkan halal · Medan selera kampus',
   'Your Order': 'Pesanan Anda',
   'Clear all': 'Kosongkan semua',
   'Order Confirmed!': 'Pesanan Disahkan!',
@@ -273,8 +273,7 @@ const Map<String, String> _ar = {
   'Reminder added âœ“': 'تمت إضافة التذكير',
   'Reminder added ✓': 'تمت إضافة التذكير',
   'Delete Reminder?': 'حذف التذكير؟',
-  'This reminder will be permanently deleted.':
-      'سيتم حذف هذا التذكير نهائيا.',
+  'This reminder will be permanently deleted.': 'سيتم حذف هذا التذكير نهائيا.',
   'Cancel': 'إلغاء',
   'Delete': 'حذف',
   'Overall Progress': 'التقدم العام',
@@ -300,17 +299,14 @@ const Map<String, String> _ar = {
   'Day Streak': 'أيام متتالية',
   'Notifications': 'الإشعارات',
   'Reminder Alerts': 'تنبيهات التذكير',
-  'Get notified for upcoming deadlines':
-      'استلم إشعارات للمواعيد القادمة',
+  'Get notified for upcoming deadlines': 'استلم إشعارات للمواعيد القادمة',
   'Timetable Updates': 'تحديثات الجدول',
-  'Class schedule changes and reminders':
-      'تغييرات جدول المحاضرات والتذكيرات',
+  'Class schedule changes and reminders': 'تغييرات جدول المحاضرات والتذكيرات',
   'Shop & CafÃ© Promos': 'عروض المتجر والمقهى',
   'Shop & Café Promos': 'عروض المتجر والمقهى',
   'Deals and new menu items': 'العروض وعناصر القائمة الجديدة',
   'Email Updates': 'تحديثات البريد الإلكتروني',
-  'University announcements via email':
-      'إعلانات الجامعة عبر البريد الإلكتروني',
+  'University announcements via email': 'إعلانات الجامعة عبر البريد الإلكتروني',
   'App Settings': 'إعدادات التطبيق',
   'Dark Mode': 'الوضع الداكن',
   'Switch to dark theme': 'التبديل إلى الوضع الداكن',

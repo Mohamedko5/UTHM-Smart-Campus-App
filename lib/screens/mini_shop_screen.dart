@@ -1618,7 +1618,7 @@ class _MiniShopScreenState extends State<MiniShopScreen>
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
-                child: ElevatedButton(
+              child: ElevatedButton(
                 onPressed: () {
                   setState(() {
                     _cart.clear();

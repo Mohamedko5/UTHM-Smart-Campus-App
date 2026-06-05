@@ -511,9 +511,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                       return InkWell(
                         onTap: () => _openSearchResult(feature),
                         borderRadius: BorderRadius.vertical(
-                          top: isFirst
-                              ? const Radius.circular(12)
-                              : Radius.zero,
+                          top:
+                              isFirst ? const Radius.circular(12) : Radius.zero,
                           bottom:
                               isLast ? const Radius.circular(12) : Radius.zero,
                         ),
@@ -987,4 +986,3 @@ class _DashboardScreenState extends State<DashboardScreen>
     };
   }
 }
-

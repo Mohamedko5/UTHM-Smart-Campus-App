@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uthm_smart_campus/models/reminder_model.dart';
+import 'package:uthm_smart_campus/services/notification_service.dart';
 import 'package:uthm_smart_campus/utils/app_language.dart';
 import 'package:uthm_smart_campus/utils/main_navigation.dart';
 
@@ -9,15 +13,9 @@ class ReminderScreen extends StatefulWidget {
   State<ReminderScreen> createState() => _ReminderScreenState();
 }
 
-class _ReminderScreenState extends State<ReminderScreen>
-    with SingleTickerProviderStateMixin {
-  // ── Colors ────────────────────────────────────────────────────
+class _ReminderScreenState extends State<ReminderScreen> {
   static const Color kBlue700 = Color(0xFF113A6E);
-  static const Color kBlue600 = Color(0xFF1A52A0);
   static const Color kBlue500 = Color(0xFF2563EB);
-  static const Color kBlue100 = Color(0xFFDBEAFE);
-  static const Color kBlue50 = Color(0xFFEFF6FF);
-  static const Color kTeal = Color(0xFF0891B2);
   static const Color kGray50 = Color(0xFFF8FAFC);
   static const Color kGray100 = Color(0xFFF1F5F9);
   static const Color kGray200 = Color(0xFFE2E8F0);
@@ -29,258 +27,112 @@ class _ReminderScreenState extends State<ReminderScreen>
   static const Color kAmber = Color(0xFFF59E0B);
   static const Color kPurple = Color(0xFF7C3AED);
 
-  // ── Animation ─────────────────────────────────────────────────
-  late AnimationController _animController;
-  late Animation<double> _fadeAnim;
+  static const String _storageKey = 'student_reminders';
 
-  // ── Filter state ──────────────────────────────────────────────
-  String _filter = 'All'; // All | Today | Upcoming | Done
-
-  // ── Reminders data ───────────────────────────────────────────
-  final List<Map<String, dynamic>> _reminders = [
-    {
-      'id': 'r001',
-      'title': 'Submit Lab Report',
-      'subject': 'Data Structures',
-      'time': '10:00 AM',
-      'date': 'Today',
-      'priority': 'High',
-      'done': false,
-      'color': Color(0xFFEF4444),
-      'icon': Icons.assignment_rounded,
-    },
-    {
-      'id': 'r002',
-      'title': 'Group Project Meeting',
-      'subject': 'Software Engineering',
-      'time': '2:00 PM',
-      'date': 'Today',
-      'priority': 'Medium',
-      'done': false,
-      'color': Color(0xFFF59E0B),
-      'icon': Icons.groups_rounded,
-    },
-    {
-      'id': 'r003',
-      'title': 'Morning Lecture',
-      'subject': 'Database Systems',
-      'time': '8:00 AM',
-      'date': 'Today',
-      'priority': 'Low',
-      'done': true,
-      'color': Color(0xFF10B981),
-      'icon': Icons.school_rounded,
-    },
-    {
-      'id': 'r004',
-      'title': 'Quiz Preparation',
-      'subject': 'Operating Systems',
-      'time': 'All Day',
-      'date': 'Tomorrow',
-      'priority': 'High',
-      'done': false,
-      'color': Color(0xFFEF4444),
-      'icon': Icons.quiz_rounded,
-    },
-    {
-      'id': 'r005',
-      'title': 'Library Book Return',
-      'subject': 'UTHM Library',
-      'time': 'Before 5 PM',
-      'date': 'Tomorrow',
-      'priority': 'High',
-      'done': false,
-      'color': Color(0xFFEF4444),
-      'icon': Icons.library_books_rounded,
-    },
-    {
-      'id': 'r006',
-      'title': 'Assignment Submission',
-      'subject': 'Network Technology',
-      'time': '11:59 PM',
-      'date': 'This Week',
-      'priority': 'Medium',
-      'done': false,
-      'color': Color(0xFFF59E0B),
-      'icon': Icons.upload_file_rounded,
-    },
-    {
-      'id': 'r007',
-      'title': 'Practical Exam',
-      'subject': 'Computer Lab',
-      'time': '9:00 AM',
-      'date': 'This Week',
-      'priority': 'High',
-      'done': false,
-      'color': Color(0xFF7C3AED),
-      'icon': Icons.computer_rounded,
-    },
-    {
-      'id': 'r008',
-      'title': 'Seminar Attendance',
-      'subject': 'Faculty of CS',
-      'time': '3:00 PM',
-      'date': 'This Week',
-      'priority': 'Low',
-      'done': false,
-      'color': Color(0xFF0891B2),
-      'icon': Icons.event_rounded,
-    },
-  ];
-
-  // ── Filters ───────────────────────────────────────────────────
-  final List<Map<String, dynamic>> _filterTabs = [
-    {'label': 'All', 'icon': Icons.list_rounded},
-    {'label': 'Today', 'icon': Icons.today_rounded},
-    {'label': 'Upcoming', 'icon': Icons.upcoming_rounded},
-    {'label': 'Done', 'icon': Icons.check_circle_rounded},
-  ];
-
-  List<Map<String, dynamic>> get _filtered {
-    switch (_filter) {
-      case 'Today':
-        return _reminders
-            .where((r) => r['date'] == 'Today' && !(r['done'] as bool))
-            .toList();
-      case 'Upcoming':
-        return _reminders
-            .where((r) =>
-                (r['date'] == 'Tomorrow' || r['date'] == 'This Week') &&
-                !(r['done'] as bool))
-            .toList();
-      case 'Done':
-        return _reminders.where((r) => r['done'] as bool).toList();
-      default:
-        return _reminders;
-    }
-  }
-
-  // Group by date
-  Map<String, List<Map<String, dynamic>>> get _grouped {
-    final Map<String, List<Map<String, dynamic>>> groups = {};
-    for (final r in _filtered) {
-      final date = r['date'] as String;
-      groups.putIfAbsent(date, () => []).add(r);
-    }
-    return groups;
-  }
-
-  int get _pendingCount => _reminders.where((r) => !(r['done'] as bool)).length;
-
-  int get _doneCount => _reminders.where((r) => r['done'] as bool).length;
+  final DateFormat _dateFormat = DateFormat('EEE, d MMM yyyy');
+  final DateFormat _timeFormat = DateFormat('h:mm a');
+  final List<ReminderModel> _reminders = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 500));
-    _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
-    _animController.forward();
+    _loadReminders();
   }
 
-  @override
-  void dispose() {
-    _animController.dispose();
-    super.dispose();
-  }
+  Future<void> _loadReminders() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getStringList(_storageKey) ?? [];
+    final reminders = saved.map(ReminderModel.fromJson).toList()
+      ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
 
-  // ── Toggle done ───────────────────────────────────────────────
-  void _toggleDone(String id) {
+    if (!mounted) return;
     setState(() {
-      final idx = _reminders.indexWhere((r) => r['id'] == id);
-      if (idx != -1) {
-        _reminders[idx]['done'] = !(_reminders[idx]['done'] as bool);
-      }
+      _reminders
+        ..clear()
+        ..addAll(reminders);
+      _isLoading = false;
     });
+
+    for (final reminder in reminders.where((item) => !item.isPast)) {
+      await NotificationService.instance.scheduleReminder(reminder);
+    }
   }
 
-  // ── Delete reminder ───────────────────────────────────────────
-  void _deleteReminder(String id) {
+  Future<void> _saveReminders() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      _storageKey,
+      _reminders.map((item) => item.toJson()).toList(),
+    );
+  }
+
+  Future<void> _addReminder(ReminderModel reminder) async {
     setState(() {
-      _reminders.removeWhere((r) => r['id'] == id);
+      _reminders.add(reminder);
+      _reminders.sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
     });
+    await _saveReminders();
+    await NotificationService.instance.scheduleReminder(reminder);
+  }
+
+  Future<void> _deleteReminder(ReminderModel reminder) async {
+    setState(() => _reminders.removeWhere((item) => item.id == reminder.id));
+    await _saveReminders();
+    await NotificationService.instance.cancelReminder(reminder.id);
+
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(context.tr('Reminder deleted')),
-        backgroundColor: kRed,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(16),
-        duration: const Duration(seconds: 2),
-        action: SnackBarAction(
-          label: 'Undo',
-          textColor: Colors.white,
-          onPressed: () {}, // Would restore in real app
-        ),
       ),
     );
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // BUILD
-  // ─────────────────────────────────────────────────────────────
+  int get _pendingCount => _reminders.where((item) => !item.isPast).length;
+
   @override
   Widget build(BuildContext context) {
-    final grouped = _grouped;
-    final dateOrder = ['Today', 'Tomorrow', 'This Week'];
-
     return Scaffold(
       backgroundColor: kGray50,
-      body: FadeTransition(
-        opacity: _fadeAnim,
-        child: Column(
-          children: [
-            // ── HEADER ──────────────────────────────────────────
-            _buildHeader(),
-
-            // ── STATS ROW ───────────────────────────────────────
-            _buildStatsRow(),
-
-            // ── FILTER TABS ─────────────────────────────────────
-            _buildFilterTabs(),
-
-            // ── REMINDER LIST ───────────────────────────────────
-            Expanded(
-              child: _filtered.isEmpty
-                  ? _buildEmptyState()
-                  : ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-                      children: [
-                        for (final date in dateOrder)
-                          if (grouped.containsKey(date)) ...[
-                            _buildDateHeader(date),
-                            const SizedBox(height: 8),
-                            ...grouped[date]!.map(
-                              (r) => _buildReminderCard(r),
-                            ),
-                            const SizedBox(height: 4),
-                          ],
-                      ],
-                    ),
-            ),
-          ],
-        ),
+      body: Column(
+        children: [
+          _buildHeader(),
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _reminders.isEmpty
+                    ? _buildEmptyState()
+                    : RefreshIndicator(
+                        onRefresh: _loadReminders,
+                        child: ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+                          itemCount: _reminders.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            return _buildReminderCard(_reminders[index]);
+                          },
+                        ),
+                      ),
+          ),
+        ],
       ),
-
-      // ── FAB ───────────────────────────────────────────────────
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showAddReminderSheet,
+        onPressed: _showReminderSheet,
         backgroundColor: kBlue500,
-        icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: Text(context.tr('Add Reminder'),
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add_rounded),
+        label: Text(context.tr('Add Reminder')),
       ),
-
       bottomNavigationBar: _buildBottomNav(),
     );
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // HEADER
-  // ─────────────────────────────────────────────────────────────
   Widget _buildHeader() {
     return Container(
+      width: double.infinity,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -288,163 +140,247 @@ class _ReminderScreenState extends State<ReminderScreen>
           colors: [kBlue700, kBlue500],
         ),
       ),
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 14,
-        left: 20,
-        right: 20,
-        bottom: 18,
+      padding: EdgeInsets.fromLTRB(
+        20,
+        MediaQuery.of(context).padding.top + 14,
+        20,
+        20,
       ),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+          IconButton(
+            onPressed: () => Navigator.maybePop(context),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+            color: Colors.white,
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.white.withValues(alpha: 0.14),
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white, size: 16),
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(context.tr('Reminders'),
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: -0.3,
-                    )),
-                Text(context.tr('Stay on top of your deadlines'),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.white.withOpacity(0.65),
-                    )),
+                Text(
+                  context.tr('Reminders'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 21,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  context.tr('Academic alerts and study tasks'),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.72),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
           ),
-          // Pending badge
-          if (_pendingCount > 0)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: kRed.withOpacity(0.85),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                '$_pendingCount pending',
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              '$_pendingCount pending',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
               ),
             ),
+          ),
         ],
       ),
     );
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // STATS ROW
-  // ─────────────────────────────────────────────────────────────
-  Widget _buildStatsRow() {
-    final total = _reminders.length;
-    final highPri = _reminders
-        .where((r) => r['priority'] == 'High' && !(r['done'] as bool))
-        .length;
-    final progress = total == 0 ? 0.0 : _doneCount / total;
+  Widget _buildReminderCard(ReminderModel reminder) {
+    final color = _typeColor(reminder.type);
+    final isPast = reminder.isPast;
 
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-      child: Column(
-        children: [
-          Row(children: [
-            _statBox('$_pendingCount', 'Pending', kRed,
-                Icons.pending_actions_rounded),
-            const SizedBox(width: 10),
-            _statBox(
-                '$_doneCount', 'Completed', kGreen, Icons.check_circle_rounded),
-            const SizedBox(width: 10),
-            _statBox('$highPri', 'High Priority', kAmber,
-                Icons.priority_high_rounded),
-          ]),
-          const SizedBox(height: 12),
-          // Progress bar
-          Column(
+    return Dismissible(
+      key: ValueKey(reminder.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        decoration: BoxDecoration(
+          color: kRed,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Icon(Icons.delete_rounded, color: Colors.white),
+      ),
+      confirmDismiss: (_) => _confirmDelete(reminder),
+      child: Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(
+            color: isPast ? kGray200 : color.withValues(alpha: 0.4),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(context.tr('Overall Progress'),
-                      style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: kGray500)),
-                  Text(
-                    '${(_doneCount)}/${total} tasks',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: kBlue500),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 8,
-                  backgroundColor: kGray100,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                      progress == 1.0 ? kGreen : kBlue500),
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: isPast ? 0.08 : 0.14),
+                  borderRadius: BorderRadius.circular(8),
                 ),
+                child: Icon(_typeIcon(reminder.type), color: color),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            reminder.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: isPast ? kGray500 : kGray800,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        _buildTypeChip(reminder.type),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      reminder.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: isPast ? kGray400 : kGray500,
+                        fontSize: 12,
+                        height: 1.35,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Icon(
+                          isPast
+                              ? Icons.history_rounded
+                              : Icons.schedule_rounded,
+                          color: isPast ? kGray400 : color,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            '${_dateFormat.format(reminder.scheduledAt)} at '
+                            '${_timeFormat.format(reminder.scheduledAt)}',
+                            style: TextStyle(
+                              color: isPast ? kGray400 : kGray800,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: context.tr('Delete'),
+                onPressed: () => _confirmDelete(reminder),
+                icon: const Icon(Icons.delete_outline_rounded),
+                color: kGray400,
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _statBox(String value, String label, Color color, IconData icon) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.2)),
+  Widget _buildTypeChip(ReminderType type) {
+    final color = _typeColor(type);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        type.label,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
         ),
-        child: Row(
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 18, color: color),
-            const SizedBox(width: 6),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(value,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: color,
-                    )),
-                Text(label,
-                    style: TextStyle(
-                      fontSize: 9,
-                      color: color.withOpacity(0.8),
-                      fontWeight: FontWeight.w600,
-                    )),
-              ],
+            Container(
+              width: 86,
+              height: 86,
+              decoration: const BoxDecoration(
+                color: Color(0xFFDBEAFE),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.notifications_active_rounded,
+                size: 42,
+                color: kBlue500,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              context.tr('No reminders yet'),
+              style: const TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w800,
+                color: kGray800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              context.tr(
+                'Create quiz, survey, study, or custom alerts for your academic tasks.',
+              ),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: kGray500,
+                fontSize: 13,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              onPressed: _showReminderSheet,
+              icon: const Icon(Icons.add_rounded),
+              label: Text(context.tr('Create Reminder')),
             ),
           ],
         ),
@@ -452,741 +388,366 @@ class _ReminderScreenState extends State<ReminderScreen>
     );
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // FILTER TABS
-  // ─────────────────────────────────────────────────────────────
-  Widget _buildFilterTabs() {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-      child: Row(
-        children: _filterTabs.map((tab) {
-          final isActive = _filter == tab['label'];
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _filter = tab['label']),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.symmetric(horizontal: 3),
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: isActive ? kBlue500 : kGray50,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: isActive ? kBlue500 : kGray200,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      tab['icon'] as IconData,
-                      size: 16,
-                      color: isActive ? Colors.white : kGray400,
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      tab['label'],
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight:
-                            isActive ? FontWeight.w700 : FontWeight.w500,
-                        color: isActive ? Colors.white : kGray500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────────
-  // DATE SECTION HEADER
-  // ─────────────────────────────────────────────────────────────
-  Widget _buildDateHeader(String date) {
-    final colors = {
-      'Today': kRed,
-      'Tomorrow': kAmber,
-      'This Week': kBlue500,
-    };
-    final icons = {
-      'Today': Icons.today_rounded,
-      'Tomorrow': Icons.event_rounded,
-      'This Week': Icons.date_range_rounded,
-    };
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        children: [
-          Icon(icons[date] ?? Icons.event_rounded,
-              size: 15, color: colors[date] ?? kGray500),
-          const SizedBox(width: 6),
-          Text(
-            date.toUpperCase(),
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: colors[date] ?? kGray500,
-              letterSpacing: 1.2,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Container(
-              height: 1,
-              color: (colors[date] ?? kGray200).withOpacity(0.25),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────────
-  // REMINDER CARD
-  // ─────────────────────────────────────────────────────────────
-  Widget _buildReminderCard(Map<String, dynamic> reminder) {
-    final isDone = reminder['done'] as bool;
-    final priority = reminder['priority'] as String;
-    final color = reminder['color'] as Color;
-    final id = reminder['id'] as String;
-
-    Color priorityColor;
-    switch (priority) {
-      case 'High':
-        priorityColor = kRed;
-        break;
-      case 'Medium':
-        priorityColor = kAmber;
-        break;
-      default:
-        priorityColor = kGreen;
-    }
-
-    return Dismissible(
-      key: Key(id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          color: kRed,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Icon(Icons.delete_rounded, color: Colors.white, size: 24),
-      ),
-      onDismissed: (_) => _deleteReminder(id),
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: 1),
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-        builder: (_, v, child) => Opacity(
-          opacity: v,
-          child: Transform.translate(
-              offset: Offset(0, 10 * (1 - v)), child: child),
-        ),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          decoration: BoxDecoration(
-            color: isDone ? kGray50 : Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: isDone ? kGray200 : color.withOpacity(0.3),
-              width: isDone ? 1 : 1.5,
-            ),
-            boxShadow: isDone
-                ? []
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                // ── Check circle ─────────────────────────────
-                GestureDetector(
-                  onTap: () => _toggleDone(id),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 26,
-                    height: 26,
-                    decoration: BoxDecoration(
-                      color: isDone ? kGreen : Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isDone ? kGreen : kGray300,
-                        width: 2,
-                      ),
-                    ),
-                    child: isDone
-                        ? const Icon(Icons.check_rounded,
-                            color: Colors.white, size: 15)
-                        : null,
-                  ),
-                ),
-                const SizedBox(width: 12),
-
-                // ── Icon ─────────────────────────────────────
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: isDone ? kGray100 : color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    reminder['icon'] as IconData,
-                    size: 20,
-                    color: isDone ? kGray400 : color,
-                  ),
-                ),
-                const SizedBox(width: 12),
-
-                // ── Info ─────────────────────────────────────
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        reminder['title'],
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: isDone ? kGray400 : kGray800,
-                          decoration:
-                              isDone ? TextDecoration.lineThrough : null,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        reminder['subject'],
-                        style: TextStyle(fontSize: 11, color: kGray500),
-                      ),
-                      const SizedBox(height: 6),
-                      Row(children: [
-                        // Time badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: isDone
-                                ? kGray100
-                                : priority == 'High'
-                                    ? const Color(0xFFFEE2E2)
-                                    : kBlue50,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Row(children: [
-                            Icon(
-                              Icons.access_time_rounded,
-                              size: 10,
-                              color: isDone
-                                  ? kGray400
-                                  : priority == 'High'
-                                      ? kRed
-                                      : kBlue500,
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              reminder['time'],
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: isDone
-                                    ? kGray400
-                                    : priority == 'High'
-                                        ? kRed
-                                        : kBlue500,
-                              ),
-                            ),
-                          ]),
-                        ),
-                        const SizedBox(width: 6),
-
-                        // Priority badge
-                        if (!isDone)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 7, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: priorityColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              priority,
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: priorityColor,
-                              ),
-                            ),
-                          ),
-                      ]),
-                    ],
-                  ),
-                ),
-
-                // ── Delete button ─────────────────────────────
-                GestureDetector(
-                  onTap: () => _confirmDelete(id),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Icon(
-                      Icons.delete_outline_rounded,
-                      size: 20,
-                      color: kGray400,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _confirmDelete(String id) {
-    showDialog(
+  Future<bool> _confirmDelete(ReminderModel reminder) async {
+    final shouldDelete = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(context.tr('Delete Reminder?'),
-            style: TextStyle(fontWeight: FontWeight.w700)),
-        content: Text(context.tr('This reminder will be permanently deleted.')),
+      builder: (context) => AlertDialog(
+        title: Text(context.tr('Delete reminder?')),
+        content: Text(
+            context.tr('This will also cancel the scheduled notification.')),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(context.tr('Cancel'), style: TextStyle(color: kGray500)),
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(context.tr('Cancel')),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _deleteReminder(id);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: kRed,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-            ),
-            child: Text(context.tr('Delete'), style: const TextStyle(color: Colors.white)),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: kRed),
+            child: Text(context.tr('Delete')),
           ),
         ],
       ),
     );
-  }
 
-  // ─────────────────────────────────────────────────────────────
-  // EMPTY STATE
-  // ─────────────────────────────────────────────────────────────
-  Widget _buildEmptyState() {
-    String emoji, title, subtitle;
-    switch (_filter) {
-      case 'Done':
-        emoji = '✅';
-        title = 'No completed tasks yet';
-        subtitle = 'Complete a reminder and it will appear here';
-        break;
-      case 'Today':
-        emoji = '🎉';
-        title = 'All clear for today!';
-        subtitle = 'No pending reminders for today';
-        break;
-      default:
-        emoji = '🔔';
-        title = 'No reminders yet';
-        subtitle = 'Tap the button below to add your first reminder';
+    if (shouldDelete == true) {
+      await _deleteReminder(reminder);
+      return true;
     }
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 60)),
-          const SizedBox(height: 16),
-          Text(title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: kGray800,
-              )),
-          const SizedBox(height: 8),
-          Text(subtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: kGray500, height: 1.5)),
-          const SizedBox(height: 24),
-          if (_filter != 'Done')
-            GestureDetector(
-              onTap: _showAddReminderSheet,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                decoration: BoxDecoration(
-                  color: kBlue500,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.add_rounded, color: Colors.white, size: 18),
-                    const SizedBox(width: 6),
-                    Text(context.tr('Add Reminder'),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        )),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
+    return false;
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // ADD REMINDER BOTTOM SHEET
-  // ─────────────────────────────────────────────────────────────
-  void _showAddReminderSheet() {
-    final titleCtrl = TextEditingController();
-    final subjectCtrl = TextEditingController();
-    String selectedDate = 'Today';
-    String selectedTime = '9:00 AM';
-    String selectedPriority = 'Medium';
-    IconData selectedIcon = Icons.notifications_rounded;
+  Future<void> _showReminderSheet() async {
+    final titleController = TextEditingController();
+    final descriptionController = TextEditingController();
+    DateTime selectedDate = DateTime.now();
+    TimeOfDay selectedTime = TimeOfDay.now();
+    ReminderType selectedType = ReminderType.quiz;
 
-    final dateOptions = ['Today', 'Tomorrow', 'This Week'];
-    final priorityOptions = ['Low', 'Medium', 'High'];
-    final iconOptions = [
-      Icons.assignment_rounded,
-      Icons.groups_rounded,
-      Icons.school_rounded,
-      Icons.quiz_rounded,
-      Icons.library_books_rounded,
-      Icons.upload_file_rounded,
-      Icons.computer_rounded,
-      Icons.event_rounded,
-      Icons.notifications_rounded,
-    ];
-
-    showModalBottomSheet(
+    await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => StatefulBuilder(
-        builder: (ctx, setSheet) => Padding(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-            ),
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Handle
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: kGray200,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final scheduledAt = DateTime(
+              selectedDate.year,
+              selectedDate.month,
+              selectedDate.day,
+              selectedTime.hour,
+              selectedTime.minute,
+            );
 
-                  Text(context.tr('Add Reminder'),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: kGray800,
-                      )),
-                  const SizedBox(height: 18),
-
-                  // Title
-                  _sheetLabel('Title'),
-                  const SizedBox(height: 6),
-                  _sheetInput(
-                      titleCtrl, 'e.g. Submit Lab Report', Icons.title_rounded),
-                  const SizedBox(height: 14),
-
-                  // Subject
-                  _sheetLabel('Subject / Course'),
-                  const SizedBox(height: 6),
-                  _sheetInput(
-                      subjectCtrl, 'e.g. Data Structures', Icons.book_rounded),
-                  const SizedBox(height: 14),
-
-                  // Date
-                  _sheetLabel('Date'),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: dateOptions.map((d) {
-                      final isActive = selectedDate == d;
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () => setSheet(() => selectedDate = d),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 150),
-                            margin: const EdgeInsets.symmetric(horizontal: 3),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                              color: isActive ? kBlue500 : kGray50,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: isActive ? kBlue500 : kGray200,
-                              ),
-                            ),
-                            child: Text(d,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: isActive ? Colors.white : kGray500,
-                                )),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Priority
-                  _sheetLabel('Priority'),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: priorityOptions.map((p) {
-                      final isActive = selectedPriority == p;
-                      final pColor = p == 'High'
-                          ? kRed
-                          : p == 'Medium'
-                              ? kAmber
-                              : kGreen;
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () => setSheet(() => selectedPriority = p),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 150),
-                            margin: const EdgeInsets.symmetric(horizontal: 3),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                              color:
-                                  isActive ? pColor : pColor.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: pColor.withOpacity(isActive ? 1 : 0.3),
-                              ),
-                            ),
-                            child: Text(p,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: isActive ? Colors.white : pColor,
-                                )),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Icon picker
-                  _sheetLabel('Icon'),
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: iconOptions.map((ico) {
-                      final isActive = selectedIcon == ico;
-                      return GestureDetector(
-                        onTap: () => setSheet(() => selectedIcon = ico),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: isActive ? kBlue500 : kGray50,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: isActive ? kBlue500 : kGray200,
-                            ),
-                          ),
-                          child: Icon(ico,
-                              size: 22,
-                              color: isActive ? Colors.white : kGray400),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 22),
-
-                  // Save button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        if (titleCtrl.text.isEmpty) return;
-                        final pColor = selectedPriority == 'High'
-                            ? kRed
-                            : selectedPriority == 'Medium'
-                                ? kAmber
-                                : kGreen;
-                        setState(() {
-                          _reminders.add({
-                            'id': 'r${DateTime.now().millisecond}',
-                            'title': titleCtrl.text,
-                            'subject': subjectCtrl.text.isEmpty
-                                ? 'General'
-                                : subjectCtrl.text,
-                            'time': selectedTime,
-                            'date': selectedDate,
-                            'priority': selectedPriority,
-                            'done': false,
-                            'color': pColor,
-                            'icon': selectedIcon,
-                          });
-                        });
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(context.tr('Reminder added ✓')),
-                            backgroundColor: kGreen,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                            margin: const EdgeInsets.all(16),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      },
-                      icon:
-                          const Icon(Icons.check_rounded, color: Colors.white),
-                      label: Text(context.tr('Save Reminder'),
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          )),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kBlue500,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
-            ),
-          ),
-        ),
-      ),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 42,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: kGray200,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Text(
+                        context.tr('Create Reminder'),
+                        style: const TextStyle(
+                          fontSize: 19,
+                          fontWeight: FontWeight.w800,
+                          color: kGray800,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        controller: titleController,
+                        label: context.tr('Title'),
+                        hint: context.tr('Your quiz is starting soon'),
+                        icon: Icons.title_rounded,
+                      ),
+                      const SizedBox(height: 12),
+                      _buildTextField(
+                        controller: descriptionController,
+                        label: context.tr('Description'),
+                        hint: context.tr('Add details about this reminder'),
+                        icon: Icons.notes_rounded,
+                        maxLines: 3,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        context.tr('Reminder Type'),
+                        style: const TextStyle(
+                          color: kGray500,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: ReminderType.values.map((type) {
+                          final isSelected = selectedType == type;
+                          final color = _typeColor(type);
+                          return ChoiceChip(
+                            selected: isSelected,
+                            avatar: Icon(
+                              _typeIcon(type),
+                              size: 18,
+                              color: isSelected ? Colors.white : color,
+                            ),
+                            label: Text(type.label),
+                            labelStyle: TextStyle(
+                              color: isSelected ? Colors.white : kGray800,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            selectedColor: color,
+                            backgroundColor: kGray50,
+                            side: BorderSide(
+                                color: isSelected ? color : kGray200),
+                            onSelected: (_) =>
+                                setSheetState(() => selectedType = type),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildPickerButton(
+                              icon: Icons.calendar_today_rounded,
+                              label: _dateFormat.format(selectedDate),
+                              onTap: () async {
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: selectedDate,
+                                  firstDate: DateTime.now(),
+                                  lastDate: DateTime.now().add(
+                                    const Duration(days: 365 * 2),
+                                  ),
+                                );
+                                if (picked != null) {
+                                  setSheetState(() => selectedDate = picked);
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _buildPickerButton(
+                              icon: Icons.access_time_rounded,
+                              label: selectedTime.format(context),
+                              onTap: () async {
+                                final picked = await showTimePicker(
+                                  context: context,
+                                  initialTime: selectedTime,
+                                );
+                                if (picked != null) {
+                                  setSheetState(() => selectedTime = picked);
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: kGray50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: kGray200),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.notifications_rounded,
+                                color: kBlue500, size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                '${context.tr('Notification time')}: '
+                                '${_dateFormat.format(scheduledAt)}, '
+                                '${_timeFormat.format(scheduledAt)}',
+                                style: const TextStyle(
+                                  color: kGray800,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: FilledButton.icon(
+                          onPressed: () async {
+                            await _handleSaveReminder(
+                              title: titleController.text,
+                              description: descriptionController.text,
+                              scheduledAt: scheduledAt,
+                              type: selectedType,
+                              sheetContext: context,
+                            );
+                          },
+                          icon: const Icon(Icons.check_rounded),
+                          label: Text(context.tr('Save Reminder')),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
+
+    titleController.dispose();
+    descriptionController.dispose();
   }
 
-  Widget _sheetLabel(String text) => Text(text,
-      style: const TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w700,
-        color: kGray500,
-        letterSpacing: 0.5,
-      ));
+  Future<void> _handleSaveReminder({
+    required String title,
+    required String description,
+    required DateTime scheduledAt,
+    required ReminderType type,
+    required BuildContext sheetContext,
+  }) async {
+    final trimmedTitle = title.trim();
+    final trimmedDescription = description.trim();
 
-  Widget _sheetInput(TextEditingController ctrl, String hint, IconData icon) {
+    if (trimmedTitle.isEmpty) {
+      _showMessage(context.tr('Please add a reminder title'));
+      return;
+    }
+
+    if (scheduledAt.isBefore(DateTime.now())) {
+      _showMessage(context.tr('Please choose a future date and time'));
+      return;
+    }
+
+    final reminder = ReminderModel(
+      id: DateTime.now().millisecondsSinceEpoch.remainder(2147483647),
+      title: trimmedTitle,
+      description: trimmedDescription.isEmpty
+          ? _defaultDescription(type)
+          : trimmedDescription,
+      scheduledAt: scheduledAt,
+      type: type,
+      createdAt: DateTime.now(),
+    );
+
+    final navigator = Navigator.of(sheetContext);
+    final successMessage = context.tr('Reminder saved');
+
+    if (!mounted) return;
+    await _addReminder(reminder);
+    navigator.pop();
+    _showMessage(successMessage);
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    int maxLines = 1,
+  }) {
     return TextField(
-      controller: ctrl,
+      controller: controller,
+      maxLines: maxLines,
       decoration: InputDecoration(
+        labelText: label,
         hintText: hint,
-        hintStyle: TextStyle(color: kGray400, fontSize: 13),
-        prefixIcon: Icon(icon, color: kGray400, size: 18),
+        prefixIcon: Icon(icon),
         filled: true,
         fillColor: kGray50,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: kGray200),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: kGray200),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: kBlue500, width: 2),
         ),
       ),
     );
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // BOTTOM NAV
-  // ─────────────────────────────────────────────────────────────
+  Widget _buildPickerButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 18),
+      label: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      style: OutlinedButton.styleFrom(
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        side: const BorderSide(color: kGray200),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
   Widget _buildBottomNav() {
-    final items = [
-      {'icon': Icons.home_rounded, 'label': 'Home'},
-      {'icon': Icons.calendar_today_rounded, 'label': 'Schedule'},
-      {'icon': Icons.notifications_rounded, 'label': 'Alerts'},
-      {'icon': Icons.person_rounded, 'label': 'Profile'},
-    ];
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: kGray100, width: 1)),
+        border: Border(top: BorderSide(color: kGray100)),
       ),
       child: SafeArea(
         top: false,
         child: SizedBox(
           height: 62,
           child: Row(
-            children: List.generate(items.length, (i) {
-              final isActive = i == 2; // Alerts tab
+            children: List.generate(kMainNavItems.length, (index) {
+              final item = kMainNavItems[index];
+              final isActive = index == 2;
               return Expanded(
-                child: GestureDetector(
-                  onTap: () => navigateToMainTab(context, i, '/reminder'),
-                  behavior: HitTestBehavior.opaque,
+                child: InkWell(
+                  onTap: () => navigateToMainTab(context, index, '/reminder'),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(items[i]['icon'] as IconData,
-                          size: 24, color: isActive ? kBlue500 : kGray400),
+                      Icon(
+                        item['icon'] as IconData,
+                        color: isActive ? kBlue500 : kGray400,
+                      ),
                       const SizedBox(height: 4),
-                      Text(context.tr(items[i]['label'] as String),
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight:
-                                isActive ? FontWeight.w700 : FontWeight.w500,
-                            color: isActive ? kBlue500 : kGray400,
-                          )),
-                      const SizedBox(height: 3),
-                      if (isActive)
-                        Container(
-                          width: 5,
-                          height: 5,
-                          decoration: const BoxDecoration(
-                            color: kBlue500,
-                            shape: BoxShape.circle,
-                          ),
+                      Text(
+                        context.tr(item['label'] as String),
+                        style: TextStyle(
+                          color: isActive ? kBlue500 : kGray400,
+                          fontSize: 10,
+                          fontWeight:
+                              isActive ? FontWeight.w800 : FontWeight.w500,
                         ),
+                      ),
                     ],
                   ),
                 ),
@@ -1197,7 +758,52 @@ class _ReminderScreenState extends State<ReminderScreen>
       ),
     );
   }
-}
 
-// ── Missing constant ──────────────────────────────────────────
-const Color kGray300 = Color(0xFFCBD5E1);
+  IconData _typeIcon(ReminderType type) {
+    switch (type) {
+      case ReminderType.quiz:
+        return Icons.quiz_rounded;
+      case ReminderType.survey:
+        return Icons.assignment_turned_in_rounded;
+      case ReminderType.study:
+        return Icons.menu_book_rounded;
+      case ReminderType.other:
+        return Icons.notifications_rounded;
+    }
+  }
+
+  Color _typeColor(ReminderType type) {
+    switch (type) {
+      case ReminderType.quiz:
+        return kRed;
+      case ReminderType.survey:
+        return kAmber;
+      case ReminderType.study:
+        return kGreen;
+      case ReminderType.other:
+        return kPurple;
+    }
+  }
+
+  String _defaultDescription(ReminderType type) {
+    switch (type) {
+      case ReminderType.quiz:
+        return 'Your quiz is starting soon';
+      case ReminderType.survey:
+        return 'Survey deadline is today';
+      case ReminderType.study:
+        return 'You should study today';
+      case ReminderType.other:
+        return 'Custom reminder alert';
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+}

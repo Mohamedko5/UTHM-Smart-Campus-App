@@ -890,8 +890,8 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
           onChanged: (v) => setState(() => _purpose = v),
           maxLines: 2,
           decoration: InputDecoration(
-            hintText:
-                context.tr('Purpose of booking (e.g. Group Study, Project Meeting)'),
+            hintText: context
+                .tr('Purpose of booking (e.g. Group Study, Project Meeting)'),
             hintStyle: TextStyle(color: kGray400, fontSize: 12),
             prefixIcon: const Padding(
               padding: EdgeInsets.only(bottom: 24),
@@ -1145,7 +1145,9 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
   }
 
   void _markSelectedSlotsBooked() {
-    if (_selectedRoom == null || _selectedStart == null || _selectedEnd == null) {
+    if (_selectedRoom == null ||
+        _selectedStart == null ||
+        _selectedEnd == null) {
       return;
     }
 
@@ -1298,82 +1300,83 @@ class _RoomBookingScreenState extends State<RoomBookingScreen>
     return GestureDetector(
       onTap: () => _showBookingDetails(booking),
       child: Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: kGray100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: (booking['color'] as Color).withOpacity(0.12),
-              borderRadius: BorderRadius.circular(12),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: kGray100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
-            child: Icon(
-              booking['icon'] as IconData,
-              color: booking['color'] as Color,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(booking['room'],
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: kGray800,
-                    )),
-                const SizedBox(height: 3),
-                Row(children: [
-                  Icon(Icons.calendar_today_rounded, size: 11, color: kGray400),
-                  const SizedBox(width: 3),
-                  Text(booking['date'],
-                      style: TextStyle(fontSize: 11, color: kGray500)),
-                  const SizedBox(width: 8),
-                  Icon(Icons.access_time_rounded, size: 11, color: kGray400),
-                  const SizedBox(width: 3),
-                  Text('${booking['start']} – ${booking['end']}',
-                      style: TextStyle(fontSize: 11, color: kGray500)),
-                ]),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: isConfirmed
-                  ? const Color(0xFFD1FAE5)
-                  : const Color(0xFFFEF3C7),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              booking['status'],
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: isConfirmed
-                    ? const Color(0xFF065F46)
-                    : const Color(0xFF92400E),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: (booking['color'] as Color).withOpacity(0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                booking['icon'] as IconData,
+                color: booking['color'] as Color,
+                size: 24,
               ),
             ),
-          ),
-        ],
-      ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(booking['room'],
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: kGray800,
+                      )),
+                  const SizedBox(height: 3),
+                  Row(children: [
+                    Icon(Icons.calendar_today_rounded,
+                        size: 11, color: kGray400),
+                    const SizedBox(width: 3),
+                    Text(booking['date'],
+                        style: TextStyle(fontSize: 11, color: kGray500)),
+                    const SizedBox(width: 8),
+                    Icon(Icons.access_time_rounded, size: 11, color: kGray400),
+                    const SizedBox(width: 3),
+                    Text('${booking['start']} – ${booking['end']}',
+                        style: TextStyle(fontSize: 11, color: kGray500)),
+                  ]),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: isConfirmed
+                    ? const Color(0xFFD1FAE5)
+                    : const Color(0xFFFEF3C7),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                booking['status'],
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: isConfirmed
+                      ? const Color(0xFF065F46)
+                      : const Color(0xFF92400E),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

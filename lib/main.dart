@@ -16,6 +16,7 @@ import 'package:uthm_smart_campus/screens/notifications/notifications_screen.dar
 import 'package:uthm_smart_campus/screens/profile_screen.dart';
 import 'package:uthm_smart_campus/screens/reminder_screen.dart';
 import 'package:uthm_smart_campus/screens/study_planner_screen.dart';
+import 'package:uthm_smart_campus/services/notification_service.dart';
 import 'package:uthm_smart_campus/screens/timetable_screen.dart';
 import 'package:uthm_smart_campus/utils/app_language.dart';
 import 'package:uthm_smart_campus/utils/theme_controller.dart';
@@ -24,6 +25,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await appLanguageController.load();
   await appThemeController.load();
+  await NotificationService.instance.initialize();
 
   await SystemChrome.setPreferredOrientations(const [
     DeviceOrientation.portraitUp,

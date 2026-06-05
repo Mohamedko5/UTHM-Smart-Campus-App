@@ -18,7 +18,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   void _sendResetMessage() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Password reset message shown in UI-only demo mode.')),
+      const SnackBar(
+          content: Text('Password reset message shown in UI-only demo mode.')),
     );
     Navigator.pop(context);
   }
@@ -30,12 +31,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('Enter your email. No real email will be sent in UI-only mode.'),
+          const Text(
+              'Enter your email. No real email will be sent in UI-only mode.'),
           const SizedBox(height: 16),
           TextField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(labelText: 'UTHM Email', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+                labelText: 'UTHM Email', border: OutlineInputBorder()),
           ),
           const SizedBox(height: 20),
           FilledButton.icon(
